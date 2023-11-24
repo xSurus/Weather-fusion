@@ -1,2 +1,2 @@
 # Weather-fusion
-We fuse weather (yes, really(
+We fuse weather (yes, really)
