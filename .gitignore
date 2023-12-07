@@ -1,0 +1,22 @@
+.DS_Store
+/webinterface/node_modules
+/webinterface/dist
+
+# local env files
+/webinterface/.env.local
+/webinterface/.env.*.local
+
+# Log files
+/webinterface/npm-debug.log*
+/webinterface/yarn-debug.log*
+/webinterface/yarn-error.log*
+/webinterface/pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
