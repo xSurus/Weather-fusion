@@ -20,3 +20,6 @@
 *.njsproj
 *.sln
 *.sw?
+
+# Python Virtualenv
+venv
