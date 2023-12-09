@@ -25,6 +25,12 @@ def lv03_95_to_ch(x, y):
     }
 
 
+def calculate_orientation(coords):
+    # Use the shoelace formula to determine the orientation (clockwise or counter-clockwise)
+    area = sum((x1 * y2 - x2 * y1) for (x1, y1), (x2, y2) in zip(coords, coords[1:]))
+    return "clockwise" if area < 0 else "counter-clockwise"
+
+
 def decode_shape_coordinates(encoded_shape, coordinates):
     x_index = encoded_shape['i']
     y_index = encoded_shape['j']
@@ -57,6 +63,18 @@ def decode_shape_coordinates(encoded_shape, coordinates):
             y_index += ord(encoded_shape['d'][2 * char_index + 1]) - 77
 
         char_index += 1
+
+    # Ensure that the first and last coordinates are the same for each LinearRing
+    if len(decoded_coordinates) > 1 and decoded_coordinates[0] != decoded_coordinates[-1]:
+        decoded_coordinates.append(decoded_coordinates[0])
+
+    # Ensure that the orientation is counter-clockwise
+    if calculate_orientation(decoded_coordinates) == "clockwise":
+        decoded_coordinates.reverse()
+
+    # Ensure that four or more coordinates are used for each Polygon
+    if len(decoded_coordinates) < 4:
+        decoded_coordinates = []
 
     return decoded_coordinates
 
@@ -106,7 +124,7 @@ def decode_geojson(input_file):
                     for c, a_item in enumerate(a):
                         if a_item['l'] == t:
                             t_result = decode_shape_coordinates(a_item, input_file['coords'])
-                            if len(t_result) > 0:
+                            if t_result is not None and len(t_result) > 0:
                                 o.append({
                                     'type': "Feature",
                                     'properties': {'color': "#" + area['color'] if c == 0 else r},
@@ -126,11 +144,8 @@ def decode_geojson(input_file):
             t = i
 
     return {
-        'type': "geojson",
-        'data': {
-            'type': "FeatureCollection",
-            'features': features
-        }
+        'type': "FeatureCollection",
+        'features': features
     }
 
 if __name__ == "__main__":
