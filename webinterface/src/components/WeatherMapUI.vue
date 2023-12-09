@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import Map from './Map.vue'
+import WindyMap from "@/components/WindyMap.vue";
 
 const tab = ref('');
 </script>
@@ -16,11 +17,10 @@ const tab = ref('');
       >
         <v-window v-model="tab">
           <v-window-item value="option-1">
-            <Map></Map>
+            <WindyMap></WindyMap>
           </v-window-item>
           <v-window-item value="option-2">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac erat eget nisl euismod aliquet. Nullam
-            sodales euismod leo, quis euismod libero tincidunt sed. Nulla facilisi. Nulla facilisi. Nulla facilisi.
+            <Map></Map>
           </v-window-item>
         </v-window>
       </v-sheet>
