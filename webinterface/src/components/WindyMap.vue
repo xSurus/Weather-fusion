@@ -4,37 +4,41 @@ import {ref, onMounted} from 'vue';
 import { loadScript } from "vue-plugin-load-script";
 
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
+.then(() => {
+  loadScript("https://api.windy.com/assets/map-forecast/libBoot.js")
   .then(() => {
-    loadScript("https://api.windy.com/assets/map-forecast/libBoot.js")
-      .then(() => {
-        const options = {
-          // Required: API key
-          key: WindyToken,
+    const options = {
+      // Required: API key
+      key: WindyToken,
 
-          // Put additional console output
-          verbose: false,
+      // Put additional console output
+      verbose: false,
 
-          // Optional: Initial state of the map
-          lat: 46.791793,
-          lon: 8.095723,
-          zoom: 8,
-        };
+      // Optional: Initial state of the map
+      lat: 46.791793,
+      lon: 8.095723,
+      zoom: 8
+    };
 
-        // Initialize Windy API
-        windyInit(options, windyAPI => {
-          // windyAPI is ready, and contain 'map', 'store',
-          // 'picker' and other usefull stuff
+    // Initialize Windy API
+    windyInit(options, windyAPI => {
+      // windyAPI is ready, and contain 'map', 'store',
+      // 'picker' and other usefull stuff
 
-          const { map } = windyAPI;
-          // .map is instance of Leaflet map
+      const { map } = windyAPI;
+      // .map is instance of Leaflet map
 
-          // Print Zoom level when user triggers zoom change
-          map.on("zoom", () => {
-            console.log(`Zoom level: ${map.getZoom()}`);
-          });
-        });
-      })
+      map.setMinZoom(8);
+      map.setMaxZoom(11);
+      map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
+
+      // Print Zoom level when user triggers zoom change
+      map.on("zoom", () => {
+        console.log(`Zoom level: ${map.getZoom()}`);
+      });
+    });
   })
+})
 </script>
 
 <template>
