@@ -156,4 +156,4 @@ if __name__ == "__main__":
 
     if decoded is not None:
         with open('../example_data/meteo.geojson', "w") as f:
-            json.dump(decoded, f, indent=2)
+            json.dump(decoded, f)

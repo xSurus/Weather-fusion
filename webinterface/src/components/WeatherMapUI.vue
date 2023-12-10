@@ -24,7 +24,7 @@ function date_string_from_slider_value(slider_value) {
   // Add slider value in minutes to date
   date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + slider_value * 5);
 
-  return `${is_today(date) ? 'Today' : dayNames[date.getDay()]} - ${date.getHours()}:${date.getMinutes()}`;
+  return `${is_today(date) ? 'Today' : 'Tomorrow'}, ${dayNames[date.getDay()]} - ${date.getHours()}:${date.getMinutes()}`;
 }
 
 

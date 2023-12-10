@@ -1,5 +1,8 @@
 <script setup>
 import { loadScript } from "vue-plugin-load-script";
+import geojson from "@/assets/example_geo_json";
+import swiss_boundries from "@/assets/swiss_boundries";
+import kanton_boundries from "@/assets/kanton_boundries";
 
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 .then(() => {
@@ -13,20 +16,58 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   });
   map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
 
-  L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
+  // L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
+  //   attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+  //   minZoom: 8,
+  //   maxZoom: 11,
+  //   bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
+  // }).addTo(map);
+
+  let heightmap = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg', {
     attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-    minZoom: 8,
-    maxZoom: 11,
     bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
+  });
+  heightmap.addTo(map);
+
+  map.createPane('labels');
+  map.getPane('labels').style.zIndex = 650;
+  map.getPane('labels').style.pointerEvents = 'none';
+
+  var positronLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
+    pane: 'labels',
+    attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    ext: 'png'
+  });
+
+  positronLabels.addTo(map);
+
+  function cloud_style(feature) {
+    return {
+      fillColor: feature.properties.color,
+      weight: 0,
+      fillOpacity: 0.6
+    };
+  }
+
+  let clouds = L.geoJSON(geojson, {style: cloud_style});
+
+  clouds.addTo(map);
+
+  L.geoJSON(swiss_boundries, {
+    style: {
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 0
+    }
   }).addTo(map);
 
-  // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
-  //   attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
-  // }).addTo(map);
-  // L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}{r}.{ext}', {
-  //   attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  //   ext: 'png'
-  // }).addTo(map);
+  L.geoJSON(kanton_boundries, {
+    style: {
+      color: '#aaa',
+      weight: 1,
+      fillOpacity: 0
+    }
+  }).addTo(map);
 });
 </script>
 
