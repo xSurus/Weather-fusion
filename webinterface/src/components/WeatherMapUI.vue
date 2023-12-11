@@ -1,6 +1,5 @@
 <script setup>
 import {ref, watch} from 'vue'
-import Map from './Map.vue'
 import WindyMap from "@/components/WindyMap.vue";
 import RainMap from "@/components/RainMap.vue";
 
