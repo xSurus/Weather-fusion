@@ -23,9 +23,8 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   //   bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
   // }).addTo(map);
 
-  let heightmap = L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg', {
-    attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-    bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
+  let heightmap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
   });
   heightmap.addTo(map);
 
@@ -42,6 +41,13 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   positronLabels.addTo(map);
 
   function cloud_style(feature) {
+    if (feature.properties.color === undefined || feature.properties.color == "#ffffff") {
+      return {
+        fillColor: '#FFF8F6',
+        weight: 0,
+        fillOpacity: 0.8
+      };
+    }
     return {
       fillColor: feature.properties.color,
       weight: 0,
