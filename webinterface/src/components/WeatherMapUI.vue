@@ -8,31 +8,7 @@ const tab = ref('');
 
 const dateSlider = ref(0);
 
-const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const fiveMinutesInADay = 288;
-
-function is_today(date) {
-  const today = new Date();
-  return date.getDate() === today.getDate() &&
-         date.getMonth() === today.getMonth() &&
-         date.getFullYear() === today.getFullYear();
-}
-
-function date_string_from_slider_value(slider_value) {
-  const date = new Date();
-
-  // Add slider value in minutes to date
-  date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + slider_value * 5);
-
-  return `${is_today(date) ? 'Today' : 'Tomorrow'}, ${dayNames[date.getDay()]} - ${date.getHours()}:${date.getMinutes()}`;
-}
-
-
-const date_string = ref('');
-
-watch(dateSlider, (newValue, oldValue) => {
-  date_string.value = date_string_from_slider_value(newValue);
-});
 </script>
 
 <template>
@@ -49,26 +25,16 @@ watch(dateSlider, (newValue, oldValue) => {
             <v-col cols="12">
               <v-window v-model="tab">
                 <v-window-item value="option-1">
-                  <WindyMap></WindyMap>
+                  <WindyMap :five_min="dateSlider"></WindyMap>
                 </v-window-item>
                 <v-window-item value="option-2">
-                  <RainMap></RainMap>
+                  <RainMap :five_min="dateSlider"></RainMap>
                 </v-window-item>
               </v-window>
             </v-col>
           </v-row>
-          <v-row justify="center">
-            <v-col cols="3">
-              <v-sheet
-                class="pa-2"
-                color="primary text-center"
-              >
-                {{ date_string }}
-              </v-sheet>
-            </v-col>
-          </v-row>
           <v-row>
-            <v-col cols="12">
+            <v-col cols="12" class="pt-0 mt-0">
               <v-slider
                 color="primary"
                 thumb-color="white"

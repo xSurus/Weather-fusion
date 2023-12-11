@@ -3,6 +3,14 @@ import { loadScript } from "vue-plugin-load-script";
 import geojson from "@/assets/example_geo_json";
 import swiss_boundries from "@/assets/swiss_boundries";
 import kanton_boundries from "@/assets/kanton_boundries";
+import MapWrapper from "@/components/MapWrapper.vue";
+
+const props = defineProps({
+  five_min: {
+    type: Number,
+    default: 0,
+  },
+});
 
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 .then(() => {
@@ -24,7 +32,6 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   // }).addTo(map);
 
   let heightmap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
   });
   heightmap.addTo(map);
 
@@ -34,7 +41,6 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
   var positronLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
     pane: 'labels',
-    attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     ext: 'png'
   });
 
@@ -78,17 +84,15 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 </script>
 
 <template>
-<div
-  id="rain"
-></div>
+<MapWrapper :five_min="props.five_min">
+  <div id="rain"></div>
+  <template #caption>
+    &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; Esri &copy; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>
+  </template>
+</MapWrapper>
 </template>
 
 <style scoped>
-#rain {
-  width: 100%;
-  height: 500px;
-}
-
 /* required styles */
 
 :deep .leaflet-pane,
@@ -487,22 +491,14 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 /* attribution and scale controls */
 
 :deep .leaflet-container .leaflet-control-attribution {
-  background: #fff;
-  background: rgba(255, 255, 255, 0.7);
-  margin: 0;
+  display: none;
 }
-:deep .leaflet-control-attribution,
+
 :deep .leaflet-control-scale-line {
   padding: 0 5px;
   color: #333;
 }
-:deep .leaflet-control-attribution a {
-  text-decoration: none;
-}
-:deep .leaflet-control-attribution a:hover {
-  text-decoration: underline;
-}
-:deep .leaflet-container .leaflet-control-attribution,
+
 :deep .leaflet-container .leaflet-control-scale {
   font-size: 11px;
 }
