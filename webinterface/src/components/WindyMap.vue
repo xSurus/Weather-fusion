@@ -71,7 +71,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       // windyAPI is ready, and contain 'map', 'store',
       // 'picker' and other usefull stuff
 
-      const { map, store } = windyAPI;
+      const { map, picker, utils, broadcast, store } = windyAPI;
       windy_store = store;
       windy_map = map;
       // .map is instance of Leaflet map
@@ -80,7 +80,35 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       map.setMaxZoom(11);
       map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
 
+      picker.on('pickerOpened', ({ lat, lon, values, overlay }) => {
+        // -> 48.4, 14.3, [ U,V, ], 'wind'
+        console.log('opened', lat, lon, values, overlay);
 
+        const windObject = utils.wind2obj(values);
+        console.log(windObject);
+      });
+
+      picker.on('pickerMoved', ({ lat, lon, values, overlay }) => {
+        // picker was dragged by user to latLon coords
+        console.log('moved', lat, lon, values, overlay);
+      });
+
+      picker.on('pickerClosed', () => {
+        // picker was closed
+      });
+
+      store.on('pickerLocation', ({ lat, lon }) => {
+        console.log(lat, lon);
+
+        const { values, overlay } = picker.getParams();
+        console.log('location changed', lat, lon, values, overlay);
+      });
+
+      // Wait since wather is rendered
+      broadcast.once('redrawFinished', () => {
+        // Opening of a picker (async)
+        picker.open({ lat: 46.791793, lon: 8.095723 });
+      });
     });
   })
 })
