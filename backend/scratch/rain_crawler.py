@@ -30,6 +30,22 @@ def request_radar_data(dt: datetime.datetime):
     return None
 
 
+def request_prediction_data(dt: datetime.datetime, version: datetime.datetime) -> Tuple[int, Union[dict, None]]:
+    """
+    Request the prediction data for a given datetime and provided a specific output version
+    """
+    dts = dt.strftime("%Y%m%d_%H%M")
+    vss = version.strftime("%Y%m%d_%H%M")
+    url = f"https://www.meteoschweiz.admin.ch/product/output/inca/precipitation/rate/version__{vss}/rate_{dts}.json"
+
+    rsp = rq.request("GET", url)
+
+    if rsp.ok:
+        return rsp.status_code, rsp.json()
+
+    return rsp.status_code, None
+
+
 def init_db(db_path: str):
     """
     Init the database.
