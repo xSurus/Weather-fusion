@@ -114,10 +114,14 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
 
     rdb = RainDB(db_path)
 
+    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+                                                        seconds=update_time.second,
+                                                        microseconds=update_time.microsecond)
+                       + datetime.timedelta(minutes=5))
+
     # Get the prediction for as long as they come and insert into the database
     while True:
-        next_prediction = update_time - datetime.timedelta(minutes=version.minute % 5) + datetime.timedelta(minutes=5)
-
+        assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
         st, js = request_prediction_data(next_prediction, version)
 
         # Successful request
