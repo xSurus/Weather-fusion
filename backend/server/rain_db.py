@@ -62,7 +62,9 @@ class RainDB:
         Get the last entry in the table
         """
         self.debug_execute("SELECT MAX(dt) FROM meteo_measure_data WHERE name IN ('radar', 'init')")
-        return datetime.datetime.strptime("%Y-%m-%d %H:%M:%S", self.cur.fetchone()[0])
+        dts = self.cur.fetchone()[0]
+        assert dts is not None, "No entry in table"
+        return datetime.datetime.strptime(dts, "%Y-%m-%d %H:%M:%S")
 
     def insert_entry(self, dt: datetime.datetime, name: str):
         """
@@ -72,3 +74,13 @@ class RainDB:
         assert name in ["radar", "prediction"], "name must be radar or prediction"
 
         self.debug_execute(f"INSERT INTO meteo_measure_data (dt, name) VALUES ('{dts}', '{name}')")
+
+    def get_outdated_radar_entries(self):
+        """
+        Get's all entries from the radar that are no longer valid
+        """
+        dt = datetime.datetime.now() - datetime.timedelta(days=1)
+        dts = dt.strftime("%Y-%m-%d %H:%M:%S")
+        self.debug_execute(f"SELECT dt FROM meteo_measure_data "
+                           f"WHERE name = 'radar' AND datetime(dt) < datetime('{dts}')")
+        return [datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M:%S") for dt in self.cur.fetchall()]
