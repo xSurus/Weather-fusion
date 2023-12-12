@@ -8,7 +8,16 @@ from server.decode_meteo_rain import decode_geojson
 from server.rain_db import RainDB
 
 
-def request_data(dt: datetime.datetime):
+# ----------------------------------------------------------------------------------------------------------------------
+# GLOBALS
+# ----------------------------------------------------------------------------------------------------------------------
+data_home = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data"
+
+
+def request_radar_data(dt: datetime.datetime):
+    """
+    Request the radar data for a given datetime.
+    """
     dts = dt.strftime("%Y%m%d_%H%M")
     rsp = rq.request("GET",
                      f"https://www.meteoschweiz.admin.ch/product/output/radar/rzc/radar_rzc.{dts}.json")
