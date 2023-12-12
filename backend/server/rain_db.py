@@ -83,9 +83,8 @@ class RainDB:
         Insert a new entry into the table
         """
         dts = dt.strftime("%Y-%m-%d %H:%M:%S")
-        assert name in ["radar", "prediction"], "name must be radar or prediction"
 
-        self.debug_execute(f"INSERT INTO meteo_measure_data (dt, name) VALUES ('{dts}', '{name}')")
+        self.debug_execute(f"INSERT INTO meteo_measure_data (dt, name) VALUES ('{dts}', 'radar')")
 
     def get_outdated_radar_entries(self):
         """
