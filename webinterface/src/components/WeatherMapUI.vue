@@ -5,6 +5,34 @@ import RainMap from "@/components/RainMap.vue";
 
 const tab = ref('');
 
+const windy = ref(null);
+const rain = ref(null);
+
+watch(tab, (newVal, OldVal) => {
+  let view = null;
+  switch(OldVal) {
+    case 'windy':
+      view = windy.value.get_map_view();
+      break;
+    case 'rain':
+      view = rain.value.get_map_view();
+      break;
+  }
+  console.log(view)
+
+  if (view === null) {
+    return;
+  }
+  // switch(newVal) {
+  //   case 'windy':
+  //     windy.value.set_map_view(view);
+  //     break;
+  //   case 'rain':
+  //     rain.value.set_map_view(view);
+  //     break;
+  // }
+});
+
 const dateSlider = ref(0);
 
 const fiveMinutesInADay = 288;
@@ -23,11 +51,11 @@ const fiveMinutesInADay = 288;
           <v-row>
             <v-col cols="12">
               <v-window v-model="tab">
-                <v-window-item value="option-1">
-                  <WindyMap :five_min="dateSlider"></WindyMap>
+                <v-window-item value="windy">
+                  <WindyMap ref="windy" :five_min="dateSlider"></WindyMap>
                 </v-window-item>
-                <v-window-item value="option-2">
-                  <RainMap :five_min="dateSlider"></RainMap>
+                <v-window-item value="rain">
+                  <RainMap ref="rain" :five_min="dateSlider"></RainMap>
                 </v-window-item>
               </v-window>
             </v-col>
@@ -60,10 +88,10 @@ const fiveMinutesInADay = 288;
           v-model="tab"
           direction="vertical"
         >
-          <v-tab value="option-1">
+          <v-tab value="windy">
             Windy
           </v-tab>
-          <v-tab value="option-2">
+          <v-tab value="rain">
             Rain
           </v-tab>
         </v-tabs>

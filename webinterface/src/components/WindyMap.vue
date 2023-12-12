@@ -15,6 +15,23 @@ const props = defineProps({
 let current_time = Date.now();
 
 let windy_store = null;
+let windy_map = null;
+
+function get_map_view() {
+  return {
+    center: windy_map.getCenter(),
+    zoom: windy_map.getZoom(),
+  };
+}
+
+function set_map_view(view) {
+  windy_map.setView(view.center, view.zoom);
+}
+
+defineExpose({
+  get_map_view,
+  set_map_view,
+});
 
 watch(() => props.five_min, (val) => {
   current_time = Date.now() + val * 5 * 60 * 1000;
@@ -47,6 +64,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
       const { map, store } = windyAPI;
       windy_store = store;
+      windy_map = map;
       // .map is instance of Leaflet map
 
       map.setMinZoom(8);

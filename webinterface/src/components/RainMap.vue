@@ -12,9 +12,28 @@ const props = defineProps({
   },
 });
 
+let leaflet_map = null;
+
+function get_map_view() {
+  return {
+    center: leaflet_map.getCenter(),
+    zoom: leaflet_map.getZoom(),
+  };
+}
+
+function set_map_view(view) {
+  leaflet_map.setView(view.center, view.zoom);
+}
+
+defineExpose({
+  get_map_view,
+  set_map_view,
+});
+
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 .then(() => {
   var map = L.map('rain')
+  leaflet_map = map;
 
   map.setView([46.791793, 8.095723], 8);
   map.setMinZoom(8);
