@@ -144,6 +144,11 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
         else:
             break
 
+        next_prediction += datetime.timedelta(minutes=5)
+
+    if os.path.exists(os.path.join(data_home, "prediction")):
+        os.remove(os.path.join(data_home, "prediction"))
+
     # Create new symlink
     os.symlink(prediction_path, os.path.join(data_home, "prediction"))
 
