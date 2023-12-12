@@ -72,16 +72,16 @@ def crawl_radar():
     now = datetime.datetime.now()
 
     while last_element < now:
-        data = request_data(last_element)
+        data = request_radar_data(last_element)
 
         # only write if we have data
         if data is not None:
             transformed = decode_geojson(data)
 
-            with open(os.path.join(data_home, f"{last_element.strftime('%Y%m%d_%H%M')}.json"), "w") as f:
+            with open(os.path.join(data_home, "history",  f"{last_element.strftime('%Y%m%d_%H%M')}.json"), "w") as f:
                 json.dump(transformed, f)
 
-            rdb.insert_entry(last_element, "radar")
+            rdb.insert_radar_entry(last_element)
             print("Got Radar for ", last_element)
 
         last_element += datetime.timedelta(minutes=5)
