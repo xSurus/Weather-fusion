@@ -79,7 +79,7 @@ def decode_shape_coordinates(encoded_shape, coordinates):
     return decoded_coordinates
 
 
-def decode_geojson(input_file):
+def decode_geojson(input_file: dict):
     t = 0
     features = []
     i = False
