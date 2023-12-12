@@ -10,6 +10,15 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  initial_view: {
+    type: Object,
+    default: () => {
+      return {
+        center: [46.791793, 8.095723],
+        zoom: 8,
+      };
+    },
+  },
 });
 
 let current_time = Date.now();
@@ -50,9 +59,9 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       verbose: false,
 
       // Optional: Initial state of the map
-      lat: 46.791793,
-      lon: 8.095723,
-      zoom: 8,
+      lat: props.initial_view.center[0],
+      lon: props.initial_view.center[1],
+      zoom: props.initial_view.zoom,
 
       timestamp: current_time.value,
     };
@@ -71,10 +80,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       map.setMaxZoom(11);
       map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
 
-      // Print Zoom level when user triggers zoom change
-      map.on("zoom", () => {
-        console.log(`Zoom level: ${map.getZoom()}`);
-      });
+
     });
   })
 })

@@ -10,6 +10,15 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  initial_view: {
+    type: Object,
+    default: () => {
+      return {
+        center: [46.791793, 8.095723],
+        zoom: 8,
+      };
+    },
+  },
 });
 
 let leaflet_map = null;
@@ -35,12 +44,9 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   var map = L.map('rain')
   leaflet_map = map;
 
-  map.setView([46.791793, 8.095723], 8);
+  map.setView(props.initial_view.center, props.initial_view.zoom);
   map.setMinZoom(8);
   map.setMaxZoom(11);
-  map.on("zoom", () => {
-    console.log(`Zoom level: ${map.getZoom()}`);
-  });
   map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
 
   // L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {

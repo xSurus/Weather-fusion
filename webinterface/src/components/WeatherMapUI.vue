@@ -8,6 +8,11 @@ const tab = ref('');
 const windy = ref(null);
 const rain = ref(null);
 
+const map_view = ref({
+  center: [46.791793, 8.095723],
+  zoom: 8,
+});
+
 watch(tab, (newVal, OldVal) => {
   let view = null;
   switch(OldVal) {
@@ -18,19 +23,27 @@ watch(tab, (newVal, OldVal) => {
       view = rain.value.get_map_view();
       break;
   }
-  console.log(view)
 
   if (view === null) {
     return;
   }
-  // switch(newVal) {
-  //   case 'windy':
-  //     windy.value.set_map_view(view);
-  //     break;
-  //   case 'rain':
-  //     rain.value.set_map_view(view);
-  //     break;
-  // }
+
+  map_view.value = view;
+
+  switch(newVal) {
+    case 'windy':
+      if (windy.value === null) {
+        return;
+      }
+      windy.value.set_map_view(view);
+      break;
+    case 'rain':
+      if (rain.value === null) {
+        return;
+      }
+      rain.value.set_map_view(view);
+      break;
+  }
 });
 
 const dateSlider = ref(0);
@@ -52,10 +65,10 @@ const fiveMinutesInADay = 288;
             <v-col cols="12">
               <v-window v-model="tab">
                 <v-window-item value="windy">
-                  <WindyMap ref="windy" :five_min="dateSlider"></WindyMap>
+                  <WindyMap ref="windy" :five_min="dateSlider" :initial_view="map_view"></WindyMap>
                 </v-window-item>
                 <v-window-item value="rain">
-                  <RainMap ref="rain" :five_min="dateSlider"></RainMap>
+                  <RainMap ref="rain" :five_min="dateSlider" :initial_view="map_view"></RainMap>
                 </v-window-item>
               </v-window>
             </v-col>
