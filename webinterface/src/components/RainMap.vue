@@ -95,11 +95,11 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 <style scoped>
 /* required styles */
 
-:deep .leaflet-pane,
-:deep .leaflet-tile,
-:deep .leaflet-marker-icon,
-:deep .leaflet-marker-shadow,
-:deep .leaflet-tile-container,
+:deep(.leaflet-pane),
+:deep(.leaflet-tile),
+:deep(.leaflet-marker-icon),
+:deep(.leaflet-marker-shadow),
+:deep(.leaflet-tile-container),
 :deep .leaflet-pane > svg,
 :deep .leaflet-pane > canvas,
 :deep .leaflet-zoom-box,
