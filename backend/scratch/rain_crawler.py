@@ -56,25 +56,46 @@ def init_db(db_path: str):
 
 
 # Better idea https://www.meteoswiss.admin.ch/product/output/versions.json
+# def get_next_prediction(dt: datetime.datetime):
+#     """
+#         Find the next prediction output if it exists, otherwise return the current one
+#         """
+#     # Get now and store the last version when we started
+#     # Subtract 15min - for data movement on meteoswiss side
+#     now = datetime.datetime.now() - datetime.timedelta(minutes=15)
+#     last_version = dt
+#
+#     # Walk forward in time until we find the next production and next prediction
+#     while dt < now:
+#         next_prediction = dt - datetime.timedelta(minutes=dt.minute % 5) + datetime.timedelta(minutes=5)
+#
+#         st, js = request_prediction_data(next_prediction, dt)
+#         if st == 200:
+#             last_version = dt
+#             print("Found new version", dt)
+#
+#         dt += datetime.timedelta(minutes=1)
+#
+#     return last_version
+
+
 def get_next_prediction(dt: datetime.datetime):
     """
     Find the next prediction output if it exists, otherwise return the current one
     """
     # Get now and store the last version when we started
-    now = datetime.datetime.now()
-    last_version = dt
+    # Subtract 15min - for data movement on meteoswiss side
+    resp = rq.get("https://www.meteoswiss.admin.ch/product/output/versions.json")
 
-    # Walk forward in time until we find the next production and next prediction
-    while dt < now:
-        next_prediction = dt - datetime.timedelta(minutes=dt.minute % 5) + datetime.timedelta(minutes=5)
+    if resp.ok:
+        content = resp.json()
+        target_dt = content.get("inca/precipitation/rate")
 
-        st, js = request_prediction_data(next_prediction, dt)
-        if st == 200:
-            last_version = dt
+        new_dt = datetime.datetime.strptime(target_dt, "%Y%m%d_%H%M")
+        if new_dt > dt:
+            return new_dt
 
-        dt += datetime.timedelta(minutes=1)
-
-    return last_version
+    return dt
 
 
 def update_prediction(version: datetime.datetime, update_time: datetime.datetime):
