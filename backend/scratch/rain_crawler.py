@@ -130,6 +130,8 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
             assert js is not None, "js is None from meteoswiss prediction response"
             store_path = os.path.join(prediction_path, f"{next_prediction.strftime('%Y%m%d_%H%M')}.json")
 
+            print(f"Got Prediction: {next_prediction.strftime('%Y%m%d_%H%M')}")
+
             # Transform the MeteoData to GeoJSON
             transformed = decode_geojson(js)
 
