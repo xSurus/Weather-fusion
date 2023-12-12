@@ -44,10 +44,13 @@ def crawl_radar():
 
         # only write if we have data
         if data is not None:
+            transformed = decode_geojson(data)
+
             with open(os.path.join(data_home, f"{last_element.strftime('%Y%m%d_%H%M')}.json"), "w") as f:
-                json.dump(data, f)
+                json.dump(transformed, f)
 
             rdb.insert_entry(last_element, "radar")
+            print("Got Radar for ", last_element)
 
         last_element += datetime.timedelta(minutes=5)
 
@@ -55,5 +58,7 @@ def crawl_radar():
 
 
 if __name__ == "__main__":
-    crawl_radar()
-    time.sleep(60)
+    while True:
+        crawl_radar()
+        print("Sleeping for 5 minutes")
+        time.sleep(300)
