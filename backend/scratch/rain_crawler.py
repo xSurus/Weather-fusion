@@ -240,6 +240,8 @@ def crawl_radar(update_time: datetime.datetime):
 
 if __name__ == "__main__":
     while True:
-        crawl_radar()
+        update_dt = datetime.datetime.now()
+        crawl_radar(update_time=update_dt)
+        crawl_prediction(update_time=update_dt)
         print("Sleeping for 5 minutes")
         time.sleep(300)
