@@ -183,9 +183,7 @@ def crawl_radar(update_time: datetime.datetime):
 
     assert type(last_element) is datetime.datetime, "type of last entry is not datetime"
 
-    now = datetime.datetime.now()
-
-    while last_element < now:
+    while last_element < update_time:
         data = request_radar_data(last_element)
 
         # only write if we have data
