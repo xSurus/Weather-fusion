@@ -96,6 +96,13 @@ class RainDB:
                            f"WHERE name = 'radar' AND datetime(dt) < datetime('{dts}')")
         return [datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M:%S") for dt in self.cur.fetchall()]
 
+    def remove_outdated_files(self, cutoff_dt: datetime.datetime):
+        """
+        Remove all outdated files from the database
+        """
+        dts = cutoff_dt.strftime("%Y-%m-%d %H:%M:%S")
+        self.debug_execute(f"DELETE FROM meteo_measure_data WHERE datetime(dt) < datetime('{dts}')")
+
     def insert_prediction_entry(self, dt: datetime.datetime, version_dt: datetime.datetime):
         """
         Insert a new prediction entry into the table
