@@ -232,6 +232,9 @@ def crawl_radar(update_time: datetime.datetime):
 
         last_element += datetime.timedelta(minutes=5)
 
+    # TODO prune old data
+    outdated_files = rdb.get_outdated_radar_entries(update_time)
+
     rdb.cleanup()
 
 
