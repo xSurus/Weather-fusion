@@ -86,11 +86,11 @@ class RainDB:
 
         self.debug_execute(f"INSERT INTO meteo_measure_data (dt, name) VALUES ('{dts}', 'radar')")
 
-    def get_outdated_radar_entries(self):
+    def get_outdated_radar_entries(self, update_dt: datetime.datetime):
         """
         Get's all entries from the radar that are no longer valid
         """
-        dt = datetime.datetime.now() - datetime.timedelta(days=1)
+        dt = update_dt - datetime.timedelta(days=1)
         dts = dt.strftime("%Y-%m-%d %H:%M:%S")
         self.debug_execute(f"SELECT dt FROM meteo_measure_data "
                            f"WHERE name = 'radar' AND datetime(dt) < datetime('{dts}')")
