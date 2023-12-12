@@ -56,7 +56,9 @@ def init_db(db_path: str):
 
 
 def crawl_radar():
-    data_home = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data"
+    """
+    Crawl the radar data.
+    """
     db_path = os.path.join(data_home, "rain.db")
 
     if not os.path.exists(db_path):
