@@ -50,7 +50,7 @@ class RainDB:
         dt = datetime.datetime(ndt.year, ndt.month, ndt.day, 0, 0, 0)
         dts = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-        self.debug_execute("CREATE TABLE IF NOT EXISTS meteo_measure_data (key INTEGER PRIMARY KEY, dt TEXT, name TEXT)")
+        self.debug_execute("CREATE TABLE IF NOT EXISTS meteo_measure_data (key INTEGER PRIMARY KEY, dt TEXT, name TEXT, prediction TEXT)")
         self.debug_execute("SELECT key FROM meteo_measure_data WHERE name = 'init'")
 
         # Create init entry if not exists
