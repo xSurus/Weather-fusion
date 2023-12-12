@@ -1,8 +1,10 @@
 import datetime
 import json
 import os.path
+import shutil
 import time
 import requests as rq
+from typing import Tuple, Union
 
 from server.decode_meteo_rain import decode_geojson
 from server.rain_db import RainDB
