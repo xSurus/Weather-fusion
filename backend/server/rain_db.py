@@ -66,7 +66,19 @@ class RainDB:
         assert dts is not None, "No entry in table"
         return datetime.datetime.strptime(dts, "%Y-%m-%d %H:%M:%S")
 
-    def insert_entry(self, dt: datetime.datetime, name: str):
+    def get_first_prediction(self) -> Union[datetime.datetime, None]:
+        """
+        Get the first prediction in the table
+        """
+        self.debug_execute("SELECT MIN(dt) FROM meteo_measure_data WHERE name = 'prediction'")
+        row = self.cur.fetchone()
+        if row is None:
+            return None
+
+        dts = row[0]
+        return datetime.datetime.strptime(dts, "%Y-%m-%d %H:%M:%S")
+
+    def insert_radar_entry(self, dt: datetime.datetime):
         """
         Insert a new entry into the table
         """
