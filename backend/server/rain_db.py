@@ -95,3 +95,31 @@ class RainDB:
         self.debug_execute(f"SELECT dt FROM meteo_measure_data "
                            f"WHERE name = 'radar' AND datetime(dt) < datetime('{dts}')")
         return [datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M:%S") for dt in self.cur.fetchall()]
+
+    def insert_prediction_entry(self, dt: datetime.datetime, version_dt: datetime.datetime):
+        """
+        Insert a new prediction entry into the table
+        """
+        dts = dt.strftime("%Y-%m-%d %H:%M:%S")
+        version_dts = version_dt.strftime("%Y-%m-%d %H:%M:%S")
+        self.debug_execute(f"INSERT INTO meteo_measure_data (dt, name, prediction) "
+                           f"VALUES ('{dts}', 'prediction', '{version_dts}')")
+
+    def remove_last_prediction(self):
+        """
+        Remove all from the last prediction from the database
+        """
+        self.debug_execute("SELECT DISTINCT(prediction) FROM meteo_measure_data "
+                           "WHERE prediction IS NOT NULL GROUP BY prediction ORDER BY prediction DESC")
+        all_rows = self.cur.fetchall()
+        if len(all_rows) > 2:
+            self.logger.warning("More than 2 predictions in the database. This should not happen.")
+
+        if len(all_rows) == 2:
+            dts = all_rows[1][0]
+            dt = datetime.datetime.strptime(dts, "%Y-%m-%d %H:%M:%S")
+
+            self.debug_execute(f"DELETE FROM meteo_measure_data WHERE prediction = '{dts}'")
+            return dt
+
+        return None
