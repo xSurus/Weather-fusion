@@ -222,7 +222,9 @@ def crawl_radar(update_time: datetime.datetime):
         if data is not None:
             transformed = decode_geojson(data)
 
-            with open(os.path.join(data_home, "history",  f"{last_element.strftime('%Y%m%d_%H%M')}.json"), "w") as f:
+            store_path = os.path.join(data_home, "history",  f"{last_element.strftime('%Y%m%d_%H%M')}.json")
+
+            with open(store_path, "w") as f:
                 json.dump(transformed, f)
 
             rdb.insert_radar_entry(last_element)
