@@ -148,10 +148,11 @@ def decode_geojson(input_file: dict):
         'features': features
     }
 
+
 if __name__ == "__main__":
     import json
     decoded = None
-    with open('../example_data/meteo.json', "r") as f:
+    with open('../../example_data/meteo.json', "r") as f:
         decoded = decode_geojson(json.load(f))
 
     if decoded is not None:
