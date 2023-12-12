@@ -29,6 +29,9 @@ def request_radar_data(dt: datetime.datetime):
 
 
 def init_db(db_path: str):
+    """
+    Init the database.
+    """
     rdb = RainDB(db_path)
     rdb.create_tables()
     rdb.cleanup()
