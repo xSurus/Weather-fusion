@@ -94,7 +94,7 @@ class RainDB:
         dts = dt.strftime("%Y-%m-%d %H:%M:%S")
         self.debug_execute(f"SELECT dt FROM meteo_measure_data "
                            f"WHERE name = 'radar' AND datetime(dt) < datetime('{dts}')")
-        return [datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M:%S") for dt in self.cur.fetchall()]
+        return [datetime.datetime.strptime(dt[0], "%Y-%m-%d %H:%M:%S") for dt in self.cur.fetchall()]
 
     def remove_outdated_files(self, cutoff_dt: datetime.datetime):
         """
