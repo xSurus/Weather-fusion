@@ -38,7 +38,7 @@ def get_rain(date: str):
         return FileResponse(history_path)
 
     elif os.path.exists(prediction_path):
-        return FileResponse(os.path.join(storage_path, "prediction", file_name))
+        return FileResponse(prediction_path)
 
     raise HTTPException(status_code=404, detail="No data for this date")
 
