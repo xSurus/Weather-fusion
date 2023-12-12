@@ -76,12 +76,19 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 </style>
 
 <style>
-
 #windy #logo-wrapper #logo {
   left: 80px;
 }
 
 #windy #progress-bar {
   display: none !important;
+}
+
+#windy #mobile-ovr-select {
+  display: none !important;
+}
+
+#windy #embed-zoom {
+  top: 0 !important;
 }
 </style>
