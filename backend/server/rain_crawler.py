@@ -17,8 +17,8 @@ from server.mongodb_data_models import *
 # ----------------------------------------------------------------------------------------------------------------------
 # GLOBALS
 # ----------------------------------------------------------------------------------------------------------------------
-data_home = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data"
-config_path = os.path.join(data_home, "server_config.json")
+config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
+
 
 if not os.path.exists(config_path):
     raise FileNotFoundError("Please create the server_config.json file in the data folder")
