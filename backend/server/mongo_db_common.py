@@ -40,6 +40,16 @@ def insert_radar_record(mongo: MongoAPI, record: RainRecord) -> bson.ObjectId:
     return mongo.insert_one(collection="rain_data", document_dict=dtc)
 
 
+def insert_prediction_record(mongo: MongoAPI, record: RainRecord) -> bson.ObjectId:
+    """
+    Insert a radar record into the database.
+    """
+    dtc = record.model_dump()
+    del dtc["record_id"]
+
+    return mongo.insert_one(collection="rain_data", document_dict=dtc)
+
+
 def get_outdated_radar_entries(mongo: MongoAPI, now: datetime.datetime) -> List[RainRecord]:
     """
     Get all outdated radar entries.
