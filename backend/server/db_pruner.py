@@ -57,4 +57,7 @@ def prune_radar():
 
 
 if __name__ == "__main__":
-    prune_radar()
+    while True:
+        prune_radar()
+        prune_prediction()
+        time.sleep(1800)
