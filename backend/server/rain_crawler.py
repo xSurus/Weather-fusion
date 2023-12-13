@@ -64,39 +64,6 @@ def request_prediction_data(dt: datetime.datetime, version: datetime.datetime) -
     return rsp.status_code, None
 
 
-def init_db(db_path: str):
-    """
-    Init the database.
-    """
-    rdb = RainDB(db_path)
-    rdb.create_tables()
-    rdb.cleanup()
-
-
-# Better idea https://www.meteoswiss.admin.ch/product/output/versions.json
-# def get_next_prediction(dt: datetime.datetime):
-#     """
-#         Find the next prediction output if it exists, otherwise return the current one
-#         """
-#     # Get now and store the last version when we started
-#     # Subtract 15min - for data movement on meteoswiss side
-#     now = datetime.datetime.now() - datetime.timedelta(minutes=15)
-#     last_version = dt
-#
-#     # Walk forward in time until we find the next production and next prediction
-#     while dt < now:
-#         next_prediction = dt - datetime.timedelta(minutes=dt.minute % 5) + datetime.timedelta(minutes=5)
-#
-#         st, js = request_prediction_data(next_prediction, dt)
-#         if st == 200:
-#             last_version = dt
-#             print("Found new version", dt)
-#
-#         dt += datetime.timedelta(minutes=1)
-#
-#     return last_version
-
-
 def get_next_prediction(dt: Union[datetime.datetime, None]):
     """
     Find the next prediction output if it exists, otherwise return the current one
