@@ -98,7 +98,7 @@ def init_db(db_path: str):
 #     return last_version
 
 
-def get_next_prediction(dt: datetime.datetime):
+def get_next_prediction(dt: Union[datetime.datetime, None]):
     """
     Find the next prediction output if it exists, otherwise return the current one
     """
@@ -110,8 +110,8 @@ def get_next_prediction(dt: datetime.datetime):
         content = resp.json()
         target_dt = content.get("inca/precipitation/rate")
 
-        new_dt = datetime.datetime.strptime(target_dt, "%Y%m%d_%H%M")
-        if new_dt > dt:
+        new_dt = pytz.utc.localize(datetime.datetime.strptime(target_dt, "%Y%m%d_%H%M"))
+        if dt is None or new_dt > dt:
             return new_dt
 
     return dt
