@@ -84,3 +84,35 @@ def get_outdated_prediction_entries(mongo: MongoAPI) -> List[RainRecord]:
 
     return res
 
+
+def get_rain_record(mongo: MongoAPI, dt: datetime) -> Union[RainRecord, None]:
+    """
+    Get a rain record from the database.
+    """
+
+    assert dt.minute % 5 == 0, "dt is not a multiple of 5 minutes"
+
+    res = mongo.find_one(collection="rain_data", filter_dict={
+        "$or": [
+            {
+                "$and": [
+                    {"type": "radar"},
+                    {"dt": dt},
+                ]
+            },
+            {
+                "$and": [
+                    {"type": "prediction"},
+                    {"dt": dt},
+                    {"version": {"$ne": None}},
+                ]
+            }
+        ]
+    },
+                         sort={"version": -1})
+
+    if res is not None:
+        res["_id"] = object_id_to_string(res["_id"])
+        return RainRecord(**res)
+
+    return None
