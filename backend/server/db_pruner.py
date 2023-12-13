@@ -48,7 +48,12 @@ def prune_radar():
     """
     now = datetime.datetime.now(datetime.UTC)
     entries = mdbc.get_outdated_radar_entries(mongo, now)
-    # pytz.utc.localize(code_obj.expires)
+
+    for entry in entries:
+        # TODO delete the file
+        # TODO delete the entry
+        pass
+
 
 
 if __name__ == "__main__":
