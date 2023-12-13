@@ -76,7 +76,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       // windyAPI is ready, and contain 'map', 'store',
       // 'picker' and other usefull stuff
 
-      const { map, picker, utils, broadcast, store } = windyAPI;
+      const { map, store, utils, broadcast, picker  } = windyAPI;
       windy_store = store;
       windy_map = map;
       // .map is instance of Leaflet map
@@ -84,37 +84,6 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       map.setMinZoom(8);
       map.setMaxZoom(11);
       map.setMaxBounds([[min_lat, min_lon], [max_lat, max_lon]]);
-
-      if (true) {
-        let wind_data = [];
-
-        picker.on('pickerOpened', ({ lat, lon, values, overlay }) => {
-          console.log('opened', lat, lon, values, overlay)
-          const windObject = utils.wind2obj(values);
-          wind_data.push({
-            lat: lat,
-            lon: lon,
-            spd: windObject.wind,
-            dir: windObject.dir,
-          })
-        });
-        // Wait until weather is rendered
-        broadcast.once('redrawFinished', () => {
-          const resolution_x = 1;
-          const resolution_y = 1;
-
-          for (let i = 0; i < resolution_x; i++) {
-            const current_lat = min_lat + (max_lat - min_lat) * i / resolution_x;
-            for (let j = 0; j < resolution_y; j++) {
-              const current_lon = min_lon + (max_lon - min_lon) * j / resolution_y;
-
-              console.log(props.initial_view.center[0], props.initial_view.center[1]);
-            }
-          }
-
-          console.log(wind_data);
-        });
-      }
     });
   })
 })
