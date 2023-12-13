@@ -1,7 +1,5 @@
-import datetime
 import json
 import os.path
-import shutil
 import time
 import pytz
 import requests as rq
@@ -121,18 +119,6 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
     """
     Update the prediction data
     """
-    # Create new directory
-    prediction_path = os.path.join(server_config.data_home, f"prediction_{version.strftime('%Y%m%d_%H%M')}")
-    os.makedirs(prediction_path, exist_ok=True)
-
-    db_path = os.path.join(server_config.data_home, "rain.db")
-
-    # Check if the db exists and init otherwise
-    if not os.path.exists(db_path):
-        init_db(db_path)
-
-    rdb = RainDB(db_path)
-
     next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
                                                         seconds=update_time.second,
                                                         microseconds=update_time.microsecond)
@@ -147,7 +133,7 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
         if st == 200:
 
             assert js is not None, "js is None from meteoswiss prediction response"
-            store_path = os.path.join(prediction_path, f"{next_prediction.strftime('%Y%m%d_%H%M')}.json")
+            store_path = os.path.join(server_config.data_home, "storage", "temp.json")
 
             print(f"Got Prediction: {next_prediction.strftime('%Y%m%d_%H%M')}")
 
@@ -158,33 +144,24 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
             with open(store_path, "w") as f:
                 json.dump(transformed, f)
 
-            rdb.insert_prediction_entry(next_prediction, version)
+            record = RainRecord(
+                dt=next_prediction,
+                type="prediction",
+                processed=True,
+                version=version
+            )
+
+            record.record_id = mdbc.insert_prediction_record(mongo, record)
+
+            os.rename(store_path, os.path.join(server_config.data_home, "storage",
+                                               f"{object_id_to_string(record.record_id)}.json"))
 
         else:
             break
 
         next_prediction += datetime.timedelta(minutes=5)
 
-    if os.path.exists(os.path.join(server_config.data_home, "prediction")):
-        os.remove(os.path.join(server_config.data_home, "prediction"))
-
-    # Create new symlink
-    os.symlink(prediction_path, os.path.join(server_config.data_home, "prediction"))
-
-    # Remove old prediction from database
-    last_prediction = rdb.remove_last_prediction()
-
-    # If the last prediction is present, we need to remove the directory
-    if last_prediction is not None:
-        old_prediction_path = os.path.join(server_config.data_home, f"prediction_{last_prediction.strftime('%Y%m%d_%H%M')}")
-
-        # If the old prediction exists, we delete it.
-        if os.path.exists(old_prediction_path) and os.path.isdir(old_prediction_path):
-            print("Deleted old path")
-            shutil.rmtree(old_prediction_path)
-
-    # Commit database
-    rdb.cleanup()
+    print("Done with prediction")
 
 
 def crawl_prediction(update_time: datetime.datetime):
