@@ -5,6 +5,11 @@ const WindyToken = 'zqPWHzq2Rai9frfxQp6gczIGDkYk6VzS';
 import {ref, onMounted, watch} from 'vue';
 import { loadScript } from "vue-plugin-load-script";
 
+const min_lat = 45.398181;
+const max_lat = 48.230651;
+const min_lon = 5.140242;
+const max_lon = 11.47757;
+
 const props = defineProps({
   five_min: {
     type: Number,
@@ -78,37 +83,38 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
       map.setMinZoom(8);
       map.setMaxZoom(11);
-      map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
+      map.setMaxBounds([[min_lat, min_lon], [max_lat, max_lon]]);
 
-      picker.on('pickerOpened', ({ lat, lon, values, overlay }) => {
-        // -> 48.4, 14.3, [ U,V, ], 'wind'
-        console.log('opened', lat, lon, values, overlay);
+      if (true) {
+        let wind_data = [];
 
-        const windObject = utils.wind2obj(values);
-        console.log(windObject);
-      });
+        picker.on('pickerOpened', ({ lat, lon, values, overlay }) => {
+          console.log('opened', lat, lon, values, overlay)
+          const windObject = utils.wind2obj(values);
+          wind_data.push({
+            lat: lat,
+            lon: lon,
+            spd: windObject.wind,
+            dir: windObject.dir,
+          })
+        });
+        // Wait until weather is rendered
+        broadcast.once('redrawFinished', () => {
+          const resolution_x = 1;
+          const resolution_y = 1;
 
-      picker.on('pickerMoved', ({ lat, lon, values, overlay }) => {
-        // picker was dragged by user to latLon coords
-        console.log('moved', lat, lon, values, overlay);
-      });
+          for (let i = 0; i < resolution_x; i++) {
+            const current_lat = min_lat + (max_lat - min_lat) * i / resolution_x;
+            for (let j = 0; j < resolution_y; j++) {
+              const current_lon = min_lon + (max_lon - min_lon) * j / resolution_y;
 
-      picker.on('pickerClosed', () => {
-        // picker was closed
-      });
+              console.log(props.initial_view.center[0], props.initial_view.center[1]);
+            }
+          }
 
-      store.on('pickerLocation', ({ lat, lon }) => {
-        console.log(lat, lon);
-
-        const { values, overlay } = picker.getParams();
-        console.log('location changed', lat, lon, values, overlay);
-      });
-
-      // Wait since wather is rendered
-      broadcast.once('redrawFinished', () => {
-        // Opening of a picker (async)
-        picker.open({ lat: 46.791793, lon: 8.095723 });
-      });
+          console.log(wind_data);
+        });
+      }
     });
   })
 })
