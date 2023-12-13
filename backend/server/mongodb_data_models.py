@@ -11,7 +11,7 @@ class RecordType(str, Enum):
 
 
 class RainRecord(BaseModel):
-    record_id:  Field(alias='_id')
+    record_id: Union[None, str] = Field(alias='_id', default=None)
     dt: datetime.datetime
     type: RecordType
     version: Union[None, datetime.datetime] = None
