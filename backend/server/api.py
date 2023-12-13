@@ -44,20 +44,18 @@ def get_rain(date: str):
 
     Send date in formtat YYYY-MM-DD HH:MM
     """
-    dt = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M")
+    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
     if dt.minute % 5 != 0:
         raise HTTPException(status_code=400, detail="Date must be a multiple of 5 minutes")
 
     # check if it exists in the radar data:
-    file_name = f"{dt.strftime('%Y%m%d_%H%M')}.json"
-    history_path = os.path.join(storage_path, "history", file_name)
-    prediction_path = os.path.join(storage_path, "prediction", file_name)
+    record = mdbc.get_rain_record(mongo, dt)
+    if record is None:
+        raise HTTPException(404, "Record not found")
+    path = os.path.join(storage_path, "storage", f"{record.record_id}.json")
 
-    if os.path.exists(history_path):
-        return FileResponse(history_path)
-
-    elif os.path.exists(prediction_path):
-        return FileResponse(prediction_path)
+    if os.path.exists(path):
+        return FileResponse(path)
 
     raise HTTPException(status_code=404, detail="No data for this date")
 
