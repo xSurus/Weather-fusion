@@ -223,37 +223,39 @@ def crawl_radar(update_time: datetime.datetime):
     """
     Crawl the radar data.
     """
-    db_path = os.path.join(data_home, "rain.db")
+    latest_record = mdbc.get_latest_radar_record(mongo)
+    latest_dt = latest_record.dt if latest_record is not None else datetime.datetime(update_time.year,
+                                                                                     update_time.month,
+                                                                                     update_time.day,
+                                                                                     0, 0, 0)
 
-    if not os.path.exists(db_path):
-        init_db(db_path)
+    assert type(latest_dt) is datetime.datetime, "type of last entry is not datetime"
 
-    rdb = RainDB(db_path)
-    last_element = rdb.get_last_entry_radar()
+    while latest_dt < update_time:
+        assert latest_dt.minute % 5 == 0, "latest_dt is not a multiple of 5 minutes"
 
-    assert type(last_element) is datetime.datetime, "type of last entry is not datetime"
-
-    while last_element < update_time:
-        data = request_radar_data(last_element)
+        data = request_radar_data(latest_dt)
 
         # only write if we have data
         if data is not None:
             transformed = decode_geojson(data)
 
-            store_path = os.path.join(data_home, "history",  f"{last_element.strftime('%Y%m%d_%H%M')}.json")
+            store_path = os.path.join(data_home, "storage",  f"temp.json")
 
             with open(store_path, "w") as f:
                 json.dump(transformed, f)
 
-            rdb.insert_radar_entry(last_element)
-            print("Got Radar for ", last_element)
+            new_element = RainRecord(
+                dt=latest_dt,
+                type="radar",
+                processed=True
+            )
 
-        last_element += datetime.timedelta(minutes=5)
+            record_id = mdbc.insert_radar_record(mongo, new_element)
+            print("Got Radar for ", latest_dt)
+            os.rename(store_path, os.path.join(data_home, "storage", f"{object_id_to_string(record_id)}.json"))
 
-    # TODO prune old data
-    outdated_files = rdb.get_outdated_radar_entries(update_time)
-
-    rdb.cleanup()
+        latest_dt += datetime.timedelta(minutes=5)
 
 
 if __name__ == "__main__":
