@@ -1,17 +1,28 @@
+import json
 import os
 import datetime
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
+from server.config import ServerConfig
 
 
-storage_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data"
+storage_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+config_path = os.path.join(storage_path, "server_config.json")
 
 
 app = FastAPI(title="Weather Fusion", version="0.1.0")
 api_app = FastAPI(title="Weather Fusion API", version="0.1.0")
 
+
+if not os.path.exists(config_path):
+    raise FileNotFoundError("Please create the server_config.json file in the data folder")
+
+with open(config_path, "r") as f:
+    d = json.load(f)
+
+    server_config = ServerConfig.model_validate(d)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Static File Serving
