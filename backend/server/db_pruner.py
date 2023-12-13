@@ -22,6 +22,26 @@ with open(config_path, "r") as f:
                      db_username=server_config.mongo_db.username, db_password=server_config.mongo_db.password)
 
 # ----------------------------------------------------------------------------------------------------------------------
+
+
+def prune_prediction():
+    """
+    Get all the outdated predictions and delete them
+    """
+    entries = mdbc.get_outdated_prediction_entries(mongo)
+    db_count = 0
+    file_count = 0
+    for entry in entries:
+        entry_id = entry["_id"]
+        p = os.path.join(server_config.data_home, "storage", f"{object_id_to_string(entry_id)}.json")
+        if os.path.exists(p):
+            os.remove(p)
+            file_count += 1
+
+        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": entry_id})
+    print(f"Deleted {db_count} entries from the database and {file_count} files from the storage")
+
+
 def prune_radar():
     """
     Prune the radar data. -> Radar files that are older than a day
