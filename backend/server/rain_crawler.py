@@ -209,7 +209,8 @@ def crawl_radar(update_time: datetime.datetime):
     latest_dt = latest_record.dt if latest_record is not None else datetime.datetime(update_time.year,
                                                                                      update_time.month,
                                                                                      update_time.day,
-                                                                                     0, 0, 0)
+                                                                                     0, 0, 0,
+                                                                                     tzinfo=datetime.UTC)
 
     assert type(latest_dt) is datetime.datetime, "type of last entry is not datetime"
 
