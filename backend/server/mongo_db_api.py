@@ -42,7 +42,7 @@ class MongoAPI:
     def collection(self, collection: str):
         return self.client[self.db_name][collection]
 
-    def find_one(self, collection: str, filter_dict: dict = None, projection_dict: dict = None, sort: list = None):
+    def find_one(self, collection: str, filter_dict: dict = None, projection_dict: dict = None, sort: Union[dict, list] = None):
         """
         Query the database.
         :param collection: Collection name string
