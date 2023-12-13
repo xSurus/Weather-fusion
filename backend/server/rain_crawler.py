@@ -21,6 +21,7 @@ config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data
 if not os.path.exists(config_path):
     raise FileNotFoundError("Please create the server_config.json file in the data folder")
 
+
 with open(config_path, "r") as f:
     d = json.load(f)
 
