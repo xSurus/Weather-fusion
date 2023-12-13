@@ -32,13 +32,12 @@ def prune_prediction():
     db_count = 0
     file_count = 0
     for entry in entries:
-        entry_id = entry["_id"]
-        p = os.path.join(server_config.data_home, "storage", f"{object_id_to_string(entry_id)}.json")
+        p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.json")
         if os.path.exists(p):
             os.remove(p)
             file_count += 1
 
-        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": entry_id})
+        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
     print(f"Deleted {db_count} entries from the database and {file_count} files from the storage")
 
 
