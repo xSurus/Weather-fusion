@@ -150,10 +150,11 @@ def crawl_radar(update_time: datetime.datetime):
     """
     Crawl the radar data.
     """
+    yesterday = update_time - datetime.timedelta(days=1)
     latest_record = mdbc.get_latest_radar_record(mongo)
-    latest_dt = latest_record.dt if latest_record is not None else datetime.datetime(update_time.year,
-                                                                                     update_time.month,
-                                                                                     update_time.day,
+    latest_dt = latest_record.dt if latest_record is not None else datetime.datetime(yesterday.year,
+                                                                                     yesterday.month,
+                                                                                     yesterday.day,
                                                                                      0, 0, 0,
                                                                                      tzinfo=datetime.UTC)
 
