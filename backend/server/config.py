@@ -10,3 +10,4 @@ class MongoDBAccess(BaseModel):
 
 class ServerConfig(BaseModel):
     mongo_db: MongoDBAccess
+    data_home: str
