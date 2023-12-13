@@ -191,32 +191,13 @@ def crawl_prediction(update_time: datetime.datetime):
     """
     Crawl Radar Prediction.
     """
-    cfg_path = os.path.join(data_home, "config.json")
-
-    # Parse the config or create a new one
-    if os.path.exists(cfg_path):
-        with open(cfg_path, "r") as f:
-            cfg = json.load(f)
-
-    else:
-        dt = datetime.datetime.now() - datetime.timedelta(days=1)
-        cfg = {
-            "latest_prediction": datetime.
-            datetime(year=dt.year, month=dt.month, day=dt.day, hour=0, minute=0, second=0).strftime("%Y-%m-%d %H:%M:%S")
-        }
-
-    old_prediction = datetime.datetime.strptime(cfg["latest_prediction"], "%Y-%m-%d %H:%M:%S")
+    old_prediction = mdbc.get_prediction_version(mongo)
 
     # check the next prediction
     new_version = get_next_prediction(old_prediction)
 
     # Update config if it has changed
-    if new_version != old_prediction:
-        cfg["latest_prediction"] = new_version.strftime("%Y-%m-%d %H:%M:%S")
-
-        with open(cfg_path, "w") as f:
-            json.dump(cfg, f)
-
+    if old_prediction is None or new_version != old_prediction:
         update_prediction(version=new_version, update_time=update_time)
 
 
