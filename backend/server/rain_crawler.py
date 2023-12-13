@@ -122,10 +122,10 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
     Update the prediction data
     """
     # Create new directory
-    prediction_path = os.path.join(data_home, f"prediction_{version.strftime('%Y%m%d_%H%M')}")
+    prediction_path = os.path.join(server_config.data_home, f"prediction_{version.strftime('%Y%m%d_%H%M')}")
     os.makedirs(prediction_path, exist_ok=True)
 
-    db_path = os.path.join(data_home, "rain.db")
+    db_path = os.path.join(server_config.data_home, "rain.db")
 
     # Check if the db exists and init otherwise
     if not os.path.exists(db_path):
@@ -165,18 +165,18 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
 
         next_prediction += datetime.timedelta(minutes=5)
 
-    if os.path.exists(os.path.join(data_home, "prediction")):
-        os.remove(os.path.join(data_home, "prediction"))
+    if os.path.exists(os.path.join(server_config.data_home, "prediction")):
+        os.remove(os.path.join(server_config.data_home, "prediction"))
 
     # Create new symlink
-    os.symlink(prediction_path, os.path.join(data_home, "prediction"))
+    os.symlink(prediction_path, os.path.join(server_config.data_home, "prediction"))
 
     # Remove old prediction from database
     last_prediction = rdb.remove_last_prediction()
 
     # If the last prediction is present, we need to remove the directory
     if last_prediction is not None:
-        old_prediction_path = os.path.join(data_home, f"prediction_{last_prediction.strftime('%Y%m%d_%H%M')}")
+        old_prediction_path = os.path.join(server_config.data_home, f"prediction_{last_prediction.strftime('%Y%m%d_%H%M')}")
 
         # If the old prediction exists, we delete it.
         if os.path.exists(old_prediction_path) and os.path.isdir(old_prediction_path):
@@ -241,7 +241,7 @@ def crawl_radar(update_time: datetime.datetime):
         if data is not None:
             transformed = decode_geojson(data)
 
-            store_path = os.path.join(data_home, "storage",  f"temp.json")
+            store_path = os.path.join(server_config.data_home, "storage",  f"temp.json")
 
             with open(store_path, "w") as f:
                 json.dump(transformed, f)
@@ -254,7 +254,8 @@ def crawl_radar(update_time: datetime.datetime):
 
             record_id = mdbc.insert_radar_record(mongo, new_element)
             print("Got Radar for ", latest_dt)
-            os.rename(store_path, os.path.join(data_home, "storage", f"{object_id_to_string(record_id)}.json"))
+            os.rename(store_path, os.path.join(server_config.data_home, "storage",
+                                               f"{object_id_to_string(record_id)}.json"))
 
         latest_dt += datetime.timedelta(minutes=5)
 
