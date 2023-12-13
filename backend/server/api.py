@@ -2,10 +2,14 @@ import json
 import os
 import datetime
 
+import pytz
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 from server.config import ServerConfig
+
+import server.mongo_db_common as mdbc
+from server.mongo_db_api import MongoAPI, string_to_object_id, object_id_to_string
 
 
 storage_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
@@ -23,6 +27,10 @@ with open(config_path, "r") as f:
     d = json.load(f)
 
     server_config = ServerConfig.model_validate(d)
+
+    mongo = MongoAPI(db_address=server_config.mongo_db.address, db_name=server_config.mongo_db.database,
+                     db_username=server_config.mongo_db.username, db_password=server_config.mongo_db.password)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Static File Serving
