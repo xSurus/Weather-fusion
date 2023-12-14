@@ -10,18 +10,43 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  initial_view: {
+    type: Object,
+    default: () => {
+      return {
+        center: [46.791793, 8.095723],
+        zoom: 8,
+      };
+    },
+  },
+});
+
+let leaflet_map = null;
+
+function get_map_view() {
+  return {
+    center: leaflet_map.getCenter(),
+    zoom: leaflet_map.getZoom(),
+  };
+}
+
+function set_map_view(view) {
+  leaflet_map.setView(view.center, view.zoom);
+}
+
+defineExpose({
+  get_map_view,
+  set_map_view,
 });
 
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 .then(() => {
   var map = L.map('rain')
+  leaflet_map = map;
 
-  map.setView([46.791793, 8.095723], 8);
+  map.setView(props.initial_view.center, props.initial_view.zoom);
   map.setMinZoom(8);
   map.setMaxZoom(11);
-  map.on("zoom", () => {
-    console.log(`Zoom level: ${map.getZoom()}`);
-  });
   map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
 
   // L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
@@ -31,13 +56,18 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   //   bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
   // }).addTo(map);
 
-  let heightmap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
-  });
-  heightmap.addTo(map);
-
   map.createPane('labels');
   map.getPane('labels').style.zIndex = 650;
   map.getPane('labels').style.pointerEvents = 'none';
+
+
+
+  var hillshade = L.tileLayer('https://api.maptiler.com/tiles/hillshade/{z}/{x}/{y}.{ext}?key=vTloRxftNUtxWqKm2U6S', {
+    pane: 'labels',
+    ext: 'webp'
+  });
+
+  hillshade.addTo(map);
 
   var positronLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
     pane: 'labels',
@@ -47,17 +77,10 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   positronLabels.addTo(map);
 
   function cloud_style(feature) {
-    if (feature.properties.color === undefined || feature.properties.color == "#ffffff") {
-      return {
-        fillColor: '#FFF8F6',
-        weight: 0,
-        fillOpacity: 0.8
-      };
-    }
     return {
       fillColor: feature.properties.color,
       weight: 0,
-      fillOpacity: 0.6
+      fillOpacity: 1
     };
   }
 
@@ -67,7 +90,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
   L.geoJSON(swiss_boundries, {
     style: {
-      color: '#fff',
+      color: '#000',
       weight: 2,
       fillOpacity: 0
     }
@@ -75,7 +98,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
   L.geoJSON(kanton_boundries, {
     style: {
-      color: '#aaa',
+      color: '#000',
       weight: 1,
       fillOpacity: 0
     }
@@ -87,19 +110,22 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 <MapWrapper :five_min="props.five_min">
   <div id="rain"></div>
   <template #caption>
-    &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; Esri &copy; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>
+    &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.maptiler.com/copyright/" target="_blank"> MapTiler</a> &copy; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>
   </template>
 </MapWrapper>
 </template>
 
 <style scoped>
+#rain {
+  background-color: #FFFFFF;
+}
 /* required styles */
 
-:deep .leaflet-pane,
-:deep .leaflet-tile,
-:deep .leaflet-marker-icon,
-:deep .leaflet-marker-shadow,
-:deep .leaflet-tile-container,
+:deep(.leaflet-pane),
+:deep(.leaflet-tile),
+:deep(.leaflet-marker-icon),
+:deep(.leaflet-marker-shadow),
+:deep(.leaflet-tile-container),
 :deep .leaflet-pane > svg,
 :deep .leaflet-pane > canvas,
 :deep .leaflet-zoom-box,
