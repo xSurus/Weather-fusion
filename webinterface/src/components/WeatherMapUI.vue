@@ -4,6 +4,17 @@ import WindyMap from "@/components/WindyMap.vue";
 import RainMap from "@/components/RainMap.vue";
 import DangerMap from "@/components/DangerMap.vue";
 
+const props = defineProps({
+  map: {
+    type: string,
+    default: 'windy',
+  },
+});
+
+watch(() => props.map, (val) => {
+  tab.value = val;
+});
+
 const tab = ref('');
 
 const windy = ref(null);
@@ -24,7 +35,7 @@ watch(tab, (newVal, OldVal) => {
     case 'rain':
       view = rain.value.get_map_view();
       break;
-    case 'danger': 
+    case 'danger':
       view = danger.value.get_map_view();
       break;
 
@@ -73,7 +84,7 @@ const fiveMinutesInADay = 288;
         color="grey-darken-4"
         rounded
         :elevation="5"
-        
+
       >
         <v-container>
           <v-row>
@@ -118,7 +129,7 @@ const fiveMinutesInADay = 288;
         <v-tabs
           v-model="tab"
           direction="vertical"
-          
+
         >
           <v-tab value="windy">
             Windy
