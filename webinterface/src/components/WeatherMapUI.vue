@@ -2,11 +2,13 @@
 import {ref, watch} from 'vue'
 import WindyMap from "@/components/WindyMap.vue";
 import RainMap from "@/components/RainMap.vue";
+import DangerMap from "@/components/DangerMap.vue";
 
 const tab = ref('');
 
 const windy = ref(null);
 const rain = ref(null);
+const danger = ref(null)
 
 const map_view = ref({
   center: [46.791793, 8.095723],
@@ -22,6 +24,10 @@ watch(tab, (newVal, OldVal) => {
     case 'rain':
       view = rain.value.get_map_view();
       break;
+    case 'danger': 
+      view = danger.value.get_map_view();
+      break;
+
   }
 
   if (view === null) {
@@ -43,7 +49,15 @@ watch(tab, (newVal, OldVal) => {
       }
       rain.value.set_map_view(view);
       break;
+    case 'danger':
+      if (danger.value === null) {
+        return;
+      }
+      danger.value.set_map_view(view);
+      break;
   }
+
+
 });
 
 const dateSlider = ref(0);
@@ -59,6 +73,7 @@ const fiveMinutesInADay = 288;
         color="grey-darken-4"
         rounded
         :elevation="5"
+        
       >
         <v-container>
           <v-row>
@@ -69,6 +84,9 @@ const fiveMinutesInADay = 288;
                 </v-window-item>
                 <v-window-item value="rain">
                   <RainMap ref="rain" :five_min="dateSlider" :initial_view="map_view"></RainMap>
+                </v-window-item>
+                <v-window-item value="danger">
+                  <DangerMap ref="danger" :five_min="dateSlider" :initial_view="map_view"></DangerMap>
                 </v-window-item>
               </v-window>
             </v-col>
@@ -100,12 +118,16 @@ const fiveMinutesInADay = 288;
         <v-tabs
           v-model="tab"
           direction="vertical"
+          
         >
           <v-tab value="windy">
             Windy
           </v-tab>
           <v-tab value="rain">
             Rain
+          </v-tab>
+          <v-tab value="danger">
+            Danger
           </v-tab>
         </v-tabs>
       </v-sheet>

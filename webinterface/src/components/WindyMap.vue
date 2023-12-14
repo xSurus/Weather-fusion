@@ -40,6 +40,7 @@ function get_map_view() {
 
 function set_map_view(view) {
   windy_map.setView(view.center, view.zoom);
+  this.$forceUpdate();
 }
 
 defineExpose({

@@ -56,6 +56,7 @@ watch(five_minutes, (newValue) => {
 <style scoped>
 .map_wrapper {
   position: relative;
+  
 }
 
 .date_wrapper {
@@ -67,7 +68,7 @@ watch(five_minutes, (newValue) => {
   width: max-content;
 }
 
-:deep(#windy), :deep(#rain) {
+:deep(#windy), :deep(#rain), :deep(#danger){
   width: 100%;
   height: 500px;
   overflow: hidden;
@@ -80,5 +81,6 @@ watch(five_minutes, (newValue) => {
 
 .text-caption :deep(a:hover) {
   text-decoration: underline;
+
 }
 </style>
