@@ -135,7 +135,7 @@ def crawl_prediction(update_time: datetime.datetime):
     """
     Crawl Radar Prediction.
     """
-    old_prediction = mdbc.get_prediction_version(mongo)
+    old_prediction = mdbc.get_rain_prediction_version(mongo)
 
     # check the next prediction
     new_version = get_next_prediction(old_prediction)

@@ -19,7 +19,7 @@ def get_latest_radar_record(mongo: MongoAPI) -> Union[RainRecord, None]:
     return None
 
 
-def get_prediction_version(mongo: MongoAPI) -> Union[RainRecord, None]:
+def get_rain_prediction_version(mongo: MongoAPI) -> Union[datetime, None]:
     """
     Get the latest prediction version from the database.
     """
