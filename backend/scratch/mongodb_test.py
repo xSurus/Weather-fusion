@@ -3,7 +3,7 @@ from server.config import ServerConfig
 import os
 import json
 import datetime
-from server.mongodb_data_models import RainRecord, RecordType
+from server.mongodb_data_models import RainRecord, RainRecordType
 
 data_home = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data"
 config_path = os.path.join(data_home, "server_config.json")
