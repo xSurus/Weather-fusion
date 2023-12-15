@@ -24,14 +24,30 @@ with open(config_path, "r") as f:
 # ----------------------------------------------------------------------------------------------------------------------
 
 
+def remove_rain(records: List[RainRecord], rain_type: str):
+    """
+    Remove the predictions from the records
+    """
+    db_count = 0
+    file_count = 0
+
+    for entry in records:
+        p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.json")
+        if os.path.exists(p):
+            os.remove(p)
+            file_count += 1
+
+        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
+    print(f"Deleted {db_count} {rain_type} entries from the database and {file_count} files from the storage")
+
+
 def prune_prediction():
     """
     Get all the outdated predictions and delete them
     """
     entries = mdbc.get_outdated_rain_prediction_entries(mongo)
 
-        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
-    print(f"Deleted {db_count} entries from the database and {file_count} files from the storage")
+    remove_rain(entries, "rain prediction")
 
 
 def prune_radar():
@@ -40,12 +56,7 @@ def prune_radar():
     """
     now = datetime.datetime.now(datetime.UTC)
     entries = mdbc.get_outdated_radar_entries(mongo, now)
-
-    for entry in entries:
-        # TODO delete the file
-        # TODO delete the entry
-        pass
-
+    remove_rain(entries, "rain radar")
 
 
 if __name__ == "__main__":
