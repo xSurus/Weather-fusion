@@ -6,7 +6,6 @@ import requests as rq
 from typing import Tuple, Union
 
 from server.decode_meteo_rain import decode_geojson
-from server.rain_db import RainDB
 from server.config import ServerConfig
 from server.mongo_db_api import MongoAPI, string_to_object_id, object_id_to_string
 import server.mongo_db_common as mdbc
