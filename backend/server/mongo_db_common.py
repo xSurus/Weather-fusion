@@ -65,12 +65,13 @@ def get_outdated_radar_entries(mongo: MongoAPI, now: datetime.datetime) -> List[
     return res
 
 
-def get_outdated_prediction_entries(mongo: MongoAPI) -> List[RainRecord]:
+def get_outdated_rain_prediction_entries(mongo: MongoAPI) -> List[RainRecord]:
     """
     Get all outdated prediction entries. (the ones who's version is no longer the newest)
     """
     newest_prediction = mongo.find_one(collection="rain_data", filter_dict={"type": "prediction"},
-                                       sort=[("version", -1)])
+                                       sort={"version": -1})
+
     if newest_prediction is None:
         return []
 

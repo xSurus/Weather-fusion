@@ -28,14 +28,7 @@ def prune_prediction():
     """
     Get all the outdated predictions and delete them
     """
-    entries = mdbc.get_outdated_prediction_entries(mongo)
-    db_count = 0
-    file_count = 0
-    for entry in entries:
-        p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.json")
-        if os.path.exists(p):
-            os.remove(p)
-            file_count += 1
+    entries = mdbc.get_outdated_rain_prediction_entries(mongo)
 
         db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
     print(f"Deleted {db_count} entries from the database and {file_count} files from the storage")
