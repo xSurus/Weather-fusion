@@ -11,7 +11,7 @@ def get_latest_radar_record(mongo: MongoAPI) -> Union[RainRecord, None]:
     """
     Get the latest radar record from the database.
     """
-    res = mongo.find_one(collection="rain_data", filter_dict={"type": "radar"}, sort=[("dt", -1)])
+    res = mongo.find_one(collection="rain_data", filter_dict={"type": "radar"}, sort={"dt": -1})
     res["_id"] = object_id_to_string(res["_id"])
     if res is not None:
         return RainRecord(**res)
