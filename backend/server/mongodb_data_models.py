@@ -4,6 +4,12 @@ from typing import Union
 from enum import Enum
 
 
+class RecordType(str, Enum):
+    rain = "rain"
+    wind_10m = "wind-10m"
+    wind_2000m = "wind-2000m"
+
+
 class RainRecordType(str, Enum):
     radar = "radar"
     prediction = "prediction"
