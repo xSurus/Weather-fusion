@@ -1,3 +1,4 @@
+import datetime
 import bson
 from typing import Union, List
 
@@ -23,7 +24,18 @@ def get_rain_prediction_version(mongo: MongoAPI) -> Union[datetime, None]:
     """
     Get the latest prediction version from the database.
     """
-    res = mongo.find_one(collection="rain_data", filter_dict={"type": "prediction"}, sort=[("version", -1)])
+    res = mongo.find_one(collection="rain_data", filter_dict={"type": "prediction"}, sort={"version": -1})
+    if res is not None:
+        return pytz.utc.localize(res["version"])
+
+    return None
+
+
+def get_wind_prediction_version(mongo: MongoAPI) -> Union[datetime.datetime, None]:
+    """
+    Get the current version of the wind data
+    """
+    res = mongo.find_one(collection="wind_data", filter_dict={}, sort={"version": -1})
     if res is not None:
         return pytz.utc.localize(res["version"])
 
