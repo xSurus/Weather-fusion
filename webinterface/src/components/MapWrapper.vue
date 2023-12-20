@@ -10,8 +10,15 @@ const props = defineProps({
   },
 });
 
-const five_minutes = computed(() => {
-  return props.five_min;
+const emit = defineEmits(['update:five_min']);
+
+const five_minutes = computed({
+  get() {
+    return props.five_min;
+  },
+  set(value) {
+    emit('update:five_min', value);
+  },
 });
 function is_today(date) {
   const today = new Date();
@@ -20,57 +27,105 @@ function is_today(date) {
     date.getFullYear() === today.getFullYear();
 }
 
-function date_string_from_slider_value(five_min) {
-  const date = new Date();
-
-  // Add slider value in minutes to date
-  date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + five_min * 5);
-
+function date_string_from_slider_value(date) {
   return `${is_today(date) ? 'Today' : 'Tomorrow'}, ${dayNames[date.getDay()]} - ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+// Map date hours into actual number words "one", "two", ... "twelve"
+function twelve_hour_string_from_date(date) {
+  const numbers = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven'];
+  const hour = date.getHours() % 12;
+  return numbers[hour]
+}
 
 const date_string = ref('');
+const twelve_hour_string = ref('');
 
-date_string.value = date_string_from_slider_value(props.five_min);
+function updates_strings (mins) {
+  if (mins === 0) {
+    date_string.value = 'Now';
+  }
 
-watch(five_minutes, (newValue) => {
-  date_string.value = date_string_from_slider_value(newValue);
-});
+  const date = new Date();
+
+  // Add slider value in minutes to date
+  date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + mins * 5);
+
+  date_string.value = date_string_from_slider_value(date);
+  twelve_hour_string.value = twelve_hour_string_from_date(date);
+}
+watch(five_minutes, updates_strings);
+
+updates_strings(five_minutes.value);
 </script>
 
 <template>
 <div class="map_wrapper">
   <slot></slot>
-</div>
-<div class="text-caption mt-1">
-  <slot name="caption"></slot>
-</div>
-<div class="date_wrapper mt-1">
-  <div class="date bg-primary pa-2">
+  <v-btn
+    :prepend-icon="`mdi-clock-time-${twelve_hour_string}-outline`"
+    class="time_selector ma-4"
+  >
     {{ date_string }}
+  </v-btn>
+  <div
+    class="time_slider ma-4 w-50"
+  >
+    <v-slider
+      v-model="five_minutes"
+      :min="0"
+      :max="288"
+      step="1"
+      class="pa-0 ma-0"
+      hide-details="true"
+      track-color="grey-darken-4"
+      color="white"
+    ></v-slider>
+  </div>
+  <div class="text-caption map_caption mx-4 my-1">
+    <slot name="caption"></slot>
   </div>
 </div>
+  <!--<slot name="caption"></slot>-->
+  <!--<div class="date bg-primary pa-2">
+    {{ date_string }}
+  </div>-->
 </template>
 
 <style scoped>
 .map_wrapper {
   position: relative;
-}
-
-.date_wrapper {
-  display: flex;
-  justify-content: center;
-}
-
-.date {
-  width: max-content;
-}
-
-:deep(#windy), :deep(#rain) {
   width: 100%;
-  height: 500px;
+  height: 100%;
+}
+
+.time_selector {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.time_slider {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+:deep(#windy), :deep(#rain), :deep(#danger){
+  width: 100%;
+  height: inherit;
   overflow: hidden;
+}
+
+.map_caption {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .text-caption :deep(a) {

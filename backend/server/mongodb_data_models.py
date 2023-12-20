@@ -34,3 +34,12 @@ class WindRecord(BaseModel):
     type: WindRecordType
     version: Union[None, datetime.datetime] = None
     processed: bool = False
+
+
+class DangerRecord(BaseModel):
+    record_id: Union[None, str] = Field(alias='_id', default=None)
+    dt: datetime.datetime
+    type: RecordType
+    wind_version: Union[None, datetime.datetime] = None
+    rain_version: Union[None, datetime.datetime] = None
+    processed: bool = False

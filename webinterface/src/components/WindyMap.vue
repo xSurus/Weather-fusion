@@ -2,7 +2,7 @@
 import MapWrapper from "@/components/MapWrapper.vue";
 
 const WindyToken = 'zqPWHzq2Rai9frfxQp6gczIGDkYk6VzS';
-import {ref, onMounted, watch} from 'vue';
+import {ref, onMounted, watch, computed} from 'vue';
 import { loadScript } from "vue-plugin-load-script";
 
 const min_lat = 45.398181;
@@ -26,6 +26,17 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['update:five_min']);
+
+const five_minutes = computed({
+  get() {
+    return props.five_min;
+  },
+  set(value) {
+    emit('update:five_min', value);
+  },
+});
+
 let current_time = Date.now();
 
 let windy_store = null;
@@ -40,6 +51,7 @@ function get_map_view() {
 
 function set_map_view(view) {
   windy_map.setView(view.center, view.zoom);
+  this.$forceUpdate();
 }
 
 defineExpose({
@@ -90,7 +102,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 </script>
 
 <template>
-<MapWrapper :five_min="props.five_min">
+<MapWrapper v-model:five_min="five_minutes">
   <div id="windy"></div>
   <template #caption>
     Note that windy only updates it's map every hour.
@@ -107,10 +119,8 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   left: 80px;
 }
 
-#windy #progress-bar {
-  display: none !important;
-}
-
+#windy #progress-bar,
+#windy #bottom,
 #windy #mobile-ovr-select {
   display: none !important;
 }

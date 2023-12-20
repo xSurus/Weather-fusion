@@ -352,7 +352,10 @@ if __name__ == "__main__":
     while True:
         update_dt = datetime.datetime.now(datetime.UTC)
         crawl_radar(update_time=update_dt)
-        crawl_wind_prediction(update_time=update_dt)
-        crawl_rain_prediction(update_time=update_dt)
+        data_changed = crawl_wind_prediction(update_time=update_dt)
+        data_changed = data_changed or crawl_rain_prediction(update_time=update_dt)
+
+        if data_changed:
+            regenerate_danger()
         print("Sleeping for 5 minutes")
         time.sleep(300)
