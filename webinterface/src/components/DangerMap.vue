@@ -1,9 +1,9 @@
 <script setup>
 import { loadScript } from "vue-plugin-load-script";
-import geojson from "@/assets/example_geo_json";
 import swiss_boundries from "@/assets/swiss_boundries";
 import kanton_boundries from "@/assets/kanton_boundries";
 import MapWrapper from "@/components/MapWrapper.vue";
+import {computed, watch} from "vue";
 
 const props = defineProps({
   five_min: {
@@ -19,6 +19,21 @@ const props = defineProps({
       };
     },
   },
+});
+
+const emit = defineEmits(['update:five_min']);
+
+const five_minutes = computed({
+  get() {
+    return props.five_min;
+  },
+  set(value) {
+    emit('update:five_min', value);
+  },
+});
+
+watch(five_minutes, () => {
+  update_cloud_layer();
 });
 
 let leaflet_map = null;
@@ -40,81 +55,111 @@ defineExpose({
   set_map_view,
 });
 
+let cloud_layer = null;
+
+function cloud_style(feature) {
+  return {
+    fillColor: feature.properties.color,
+    weight: 0,
+    fillOpacity: 1
+  };
+}
+
+function update_cloud_layer() {
+  fetch('/api-v1/get-danger-noodle?' + new URLSearchParams({
+    five_minutes: five_minutes.value,
+  }), {
+    method: 'GET'
+  }).then((response) => {
+    if (response.ok) {
+      try {
+        return response.json();
+      } catch (e) {
+        throw new Error('Something went wrong decoding the response');
+      }
+    } else {
+      throw new Error('Something went wrong with the request');
+    }
+  }).then(data => {
+    if (cloud_layer) {
+      cloud_layer.remove();
+    }
+    let clouds = L.geoJSON(data, {style: cloud_style});
+
+    clouds.addTo(leaflet_map);
+    cloud_layer = clouds;
+  }).catch(error => {
+    console.error(error);
+  });
+}
+
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
-.then(() => {
-  var map = L.map('danger')
-  leaflet_map = map;
+  .then(() => {
+    var map = L.map('danger')
+    leaflet_map = map;
 
-  map.setView(props.initial_view.center, props.initial_view.zoom);
-  map.setMinZoom(8);
-  map.setMaxZoom(11);
-  map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
+    map.setView(props.initial_view.center, props.initial_view.zoom);
+    map.setMinZoom(8);
+    map.setMaxZoom(11);
+    map.setMaxBounds([[45.398181, 5.140242], [48.230651, 11.47757]]);
 
-  // L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
-  //   attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
-  //   minZoom: 8,
-  //   maxZoom: 11,
-  //   bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
-  // }).addTo(map);
+    // L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {
+    //   attribution: '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+    //   minZoom: 8,
+    //   maxZoom: 11,
+    //   bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
+    // }).addTo(map);
 
-  map.createPane('labels');
-  map.getPane('labels').style.zIndex = 650;
-  map.getPane('labels').style.pointerEvents = 'none';
+    map.createPane('labels');
+    map.getPane('labels').style.zIndex = 650;
+    map.getPane('labels').style.pointerEvents = 'none';
 
-  var hillshade = L.tileLayer('https://api.maptiler.com/tiles/hillshade/{z}/{x}/{y}.{ext}?key=vTloRxftNUtxWqKm2U6S', {
-    pane: 'labels',
-    ext: 'webp'
+
+
+    var hillshade = L.tileLayer('https://api.maptiler.com/tiles/hillshade/{z}/{x}/{y}.{ext}?key=vTloRxftNUtxWqKm2U6S', {
+      pane: 'labels',
+      ext: 'webp'
+    });
+
+    hillshade.addTo(map);
+
+    var positionLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
+      pane: 'labels',
+      ext: 'png'
+    });
+
+    positionLabels.addTo(map);
+
+    update_cloud_layer();
+
+    L.geoJSON(swiss_boundries, {
+      style: {
+        color: '#000',
+        weight: 2,
+        fillOpacity: 0
+      }
+    }).addTo(map);
+
+    L.geoJSON(kanton_boundries, {
+      style: {
+        color: '#000',
+        weight: 1,
+        fillOpacity: 0
+      }
+    }).addTo(map);
   });
-
-  var positronLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
-    pane: 'labels',
-    ext: 'png'
-  });
-
-  hillshade.addTo(map);
-  positronLabels.addTo(map);
-
-  function cloud_style(feature) {
-    return {
-      fillColor: feature.properties.color,
-      weight: 0,
-      fillOpacity: 1
-    };
-  }
-
-  let clouds = L.geoJSON(geojson, {style: cloud_style});
-
-  clouds.addTo(map);
-
-  L.geoJSON(swiss_boundries, {
-    style: {
-      color: '#000',
-      weight: 2,
-      fillOpacity: 0
-    }
-  }).addTo(map);
-
-  L.geoJSON(kanton_boundries, {
-    style: {
-      color: '#000',
-      weight: 1,
-      fillOpacity: 0
-    }
-  }).addTo(map);
-});
 </script>
 
 <template>
-<MapWrapper :five_min="props.five_min">
-  <div id="danger"></div>
-  <template #caption>
-    &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; Esri &copy; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>
-  </template>
-</MapWrapper>
+  <MapWrapper v-model:five_min="five_minutes">
+    <div id="danger"></div>
+    <template #caption>
+      &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.maptiler.com/copyright/" target="_blank"> MapTiler</a> &copy; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>
+    </template>
+  </MapWrapper>
 </template>
 
 <style scoped>
-
 #danger {
   background-color: #FFFFFF;
 }
