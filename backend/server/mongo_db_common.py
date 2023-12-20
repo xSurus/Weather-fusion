@@ -153,3 +153,33 @@ def get_rain_record(mongo: MongoAPI, dt: datetime) -> Union[RainRecord, None]:
         return RainRecord(**res)
 
     return None
+
+
+def get_wind_speed(mongo: MongoAPI, dt: datetime):
+    """
+    Get the wind speed record from the database.
+    """
+    assert dt.minute == 0, "dt is not a multiple of 5 minutes"
+    res = mongo.find_one(collection="wind_data", filter_dict={"$and": [{"type": "strength"}, {"dt": dt}]},
+                         sort={"version": -1})
+
+    if res is not None:
+        res["_id"] = object_id_to_string(res["_id"])
+        return WindRecord(**res)
+
+    return None
+
+
+def get_wind_direction(mongo: MongoAPI, dt: datetime):
+    """
+    Get the wind direction record from the database.
+    """
+    assert dt.minute == 0, "dt is not a multiple of 5 minutes"
+    res = mongo.find_one(collection="wind_data", filter_dict={"$and": [{"type": "direction"}, {"dt": dt}]},
+                         sort={"version": -1})
+
+    if res is not None:
+        res["_id"] = object_id_to_string(res["_id"])
+        return WindRecord(**res)
+
+    return None
