@@ -344,6 +344,10 @@ def crawl_radar(update_time: datetime.datetime):
         latest_dt += datetime.timedelta(minutes=5)
 
 
+def regenerate_danger():
+    pass
+
+
 if __name__ == "__main__":
     while True:
         update_dt = datetime.datetime.now(datetime.UTC)
