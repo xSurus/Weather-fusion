@@ -344,6 +344,16 @@ def crawl_radar(update_time: datetime.datetime):
         latest_dt += datetime.timedelta(minutes=5)
 
 
+def update_set_color(data: list, color: str):
+    """
+    Update the color of the data
+    """
+    for entry in data:
+        entry["properties"]["color"] = color
+
+    return data
+
+
 def regenerate_danger():
     pass
 
