@@ -240,6 +240,20 @@ def crawl_rain_prediction(update_time: datetime.datetime):
         update_rain_prediction(version=new_version, update_time=update_time)
 
 
+def crawl_wind_prediction(update_time: datetime.datetime):
+    """
+    Crawl Wind Prediction.
+    """
+    old_prediction = mdbc.get_wind_prediction_version(mongo)
+
+    # check the next prediction
+    new_version = get_next_prediction(old_prediction, RecordType.wind_10m)
+
+    # Update config if it has changed
+    if old_prediction is None or new_version != old_prediction:
+        update_rain_prediction(version=new_version, update_time=update_time)
+
+
 def crawl_radar(update_time: datetime.datetime):
     """
     Crawl the radar data.
@@ -284,7 +298,7 @@ def crawl_radar(update_time: datetime.datetime):
 
 if __name__ == "__main__":
     while True:
-        update_dt = datetime.datetime.now()
+        update_dt = datetime.datetime.now(datetime.UTC)
         crawl_radar(update_time=update_dt)
         crawl_rain_prediction(update_time=update_dt)
         print("Sleeping for 5 minutes")
