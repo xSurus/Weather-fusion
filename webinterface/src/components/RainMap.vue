@@ -58,6 +58,13 @@ defineExpose({
 let cloud_layer = null;
 
 function cloud_style(feature) {
+  if (feature.properties.color.includes("cccccc") || feature.properties.color.includes("3388ff")){
+    return {
+      fillColor: "#ffffff",
+      weight: 0,
+      fillOpacity: 1
+    };
+  }
   return {
     fillColor: feature.properties.color,
     weight: 0,
