@@ -141,9 +141,9 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
                        + datetime.timedelta(minutes=5))
 
     end_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
-                                                        seconds=update_time.second,
-                                                        microseconds=update_time.microsecond)
-                       + datetime.timedelta(days=2))
+                                                       seconds=update_time.second,
+                                                       microseconds=update_time.microsecond)
+                      + datetime.timedelta(days=2))
 
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
@@ -152,7 +152,6 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
 
         # Successful request
         if st == 200:
-
             assert js is not None, "js is None from meteoswiss prediction response"
             store_path = os.path.join(server_config.data_home, "storage", "temp.json")
 
