@@ -262,7 +262,7 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
                                                f"{record.record_id}.png"))
 
-        next_prediction += datetime.timedelta(minutes=5)
+        next_prediction += datetime.timedelta(hours=1)
 
     print("Done with prediction")
 
