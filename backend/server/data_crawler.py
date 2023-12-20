@@ -180,6 +180,52 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
     print("Done with prediction")
 
 
+def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.datetime):
+    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+                                                        seconds=update_time.second,
+                                                        microseconds=update_time.microsecond)
+                       + datetime.timedelta(minutes=5))
+
+    # Get the prediction for as long as they come and insert into the database
+    while True:
+        assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
+        st, js = request_rain_prediction_data(next_prediction, version)
+
+        # Successful request
+        if st == 200:
+
+            assert js is not None, "js is None from meteoswiss prediction response"
+            store_path = os.path.join(server_config.data_home, "storage", "temp.json")
+
+            print(f"Got Prediction: {next_prediction.strftime('%Y%m%d_%H%M')}")
+
+            # Transform the MeteoData to GeoJSON
+            transformed = decode_geojson(js)
+
+            # Write to File
+            with open(store_path, "w") as f:
+                json.dump(transformed, f)
+
+            record = RainRecord(
+                dt=next_prediction,
+                type="prediction",
+                processed=True,
+                version=version
+            )
+
+            record.record_id = mdbc.insert_prediction_record(mongo, record)
+
+            os.rename(store_path, os.path.join(server_config.data_home, "storage",
+                                               f"{object_id_to_string(record.record_id)}.json"))
+
+        else:
+            break
+
+        next_prediction += datetime.timedelta(minutes=5)
+
+    print("Done with prediction")
+
+
 def crawl_rain_prediction(update_time: datetime.datetime):
     """
     Crawl Radar Prediction.
@@ -191,7 +237,7 @@ def crawl_rain_prediction(update_time: datetime.datetime):
 
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
-        update_prediction(version=new_version, update_time=update_time)
+        update_rain_prediction(version=new_version, update_time=update_time)
 
 
 def crawl_radar(update_time: datetime.datetime):
