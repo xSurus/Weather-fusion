@@ -116,8 +116,8 @@ def get_danger_noodle(five_minutes: int):
     Get the danger areas for the given date.
     """
     dt = gen_dt(five_minutes)
-    if dt.minute != 0 or dt.second != 0:
-        raise HTTPException(status_code=400, detail="Wind only available hourly.")
+    if dt.minute % 5 != 0:
+        raise HTTPException(status_code=400, detail="danger is available every 5 min")
 
     # check if it exists in the radar data:
     record = mdbc.get_danger_record(mongo, dt)
