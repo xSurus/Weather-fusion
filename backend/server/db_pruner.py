@@ -59,8 +59,23 @@ def remove_wind(records: List[WindRecord]):
             os.remove(p)
             file_count += 1
 
-        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
+        db_count += mongo.delete_one(collection="wind_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
     print(f"Deleted {db_count} wind entries from the database and {file_count} files from the storage")
+
+
+def remove_danger(records: List[WindRecord]):
+    db_count = 0
+    file_count = 0
+
+    for entry in records:
+        p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.json")
+
+        if os.path.exists(p):
+            os.remove(p)
+            file_count += 1
+
+        db_count += mongo.delete_one(collection="danger_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
+    print(f"Deleted {db_count} danger entries from the database and {file_count} files from the storage")
 
 
 def prune_rain_prediction():
@@ -81,7 +96,19 @@ def prune_radar():
     remove_rain(entries, "rain radar")
 
 
+def prune_danger():
+    """
+    Prune the danger data. -> Danger files that are older than a day
+    """
+    now = datetime.datetime.now(datetime.UTC)
+    entries = mdbc.get_outdated_danger_records(mongo, now)
+    remove_danger(entries)
+
+
 def prune_wind():
+    """
+    Remove the data from the wind and danger collections that are older than 24 hours
+    """
     now = datetime.datetime.now(datetime.UTC)
     entries = mdbc.get_outdated_wind_prediction_entries(mongo, now)
     remove_wind(entries)
@@ -92,4 +119,5 @@ if __name__ == "__main__":
         prune_radar()
         prune_rain_prediction()
         prune_wind()
+        prune_danger()
         time.sleep(1800)
