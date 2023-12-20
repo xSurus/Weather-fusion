@@ -90,6 +90,14 @@ updates_strings(five_minutes.value);
   <div class="text-caption map_caption mx-4 my-1">
     <slot name="caption"></slot>
   </div>
+  <v-sheet
+    class="legend ma-4"
+    color=""
+    rounded
+    elevation="4"
+  >
+    Hello
+  </v-sheet>
 </div>
   <!--<slot name="caption"></slot>-->
   <!--<div class="date bg-primary pa-2">
@@ -116,6 +124,13 @@ updates_strings(five_minutes.value);
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.legend {
+  position: absolute;
+  bottom: 1rem;
+  right: 0;
   z-index: 1000;
 }
 
