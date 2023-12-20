@@ -1,6 +1,5 @@
 <script setup>
 import { loadScript } from "vue-plugin-load-script";
-import geojson from "@/assets/example_geo_json";
 import swiss_boundries from "@/assets/swiss_boundries";
 import kanton_boundries from "@/assets/kanton_boundries";
 import MapWrapper from "@/components/MapWrapper.vue";
@@ -97,10 +96,27 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
     };
   }
 
-  let clouds = L.geoJSON(geojson, {style: cloud_style});
+  fetch('/api-v1/get-rain-data?' + new URLSearchParams({
+    five_minutes: five_minutes.value,
+  }), {
+    method: 'GET'
+  }).then((response) => {
+    if (response.ok) {
+      try {
+        return response.json();
+      } catch (e) {
+        throw new Error('Something went wrong decoding the response');
+      }
+    } else {
+      throw new Error('Something went wrong with the request');
+    }
+  }).then(data => {
+    let clouds = L.geoJSON(data, {style: cloud_style});
 
-  clouds.addTo(map);
-
+    clouds.addTo(map);
+  }).catch(error => {
+    console.error(error);
+  });
   L.geoJSON(swiss_boundries, {
     style: {
       color: '#000',

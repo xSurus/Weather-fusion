@@ -48,7 +48,7 @@ function updates_strings (mins) {
   const date = new Date();
 
   // Add slider value in minutes to date
-  date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + mins * 5);
+  date.setMinutes(Math.floor(date.getMinutes() / 5) * 5 + mins * 5);
 
   twelve_hour_string.value = twelve_hour_string_from_date(date);
 
