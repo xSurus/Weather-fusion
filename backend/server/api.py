@@ -38,14 +38,18 @@ with open(config_path, "r") as f:
 # ----------------------------------------------------------------------------------------------------------------------
 
 
+def gen_dt(five_minutes: int):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    now -= datetime.timedelta(minutes=now.minute % 5, seconds=now.second, microseconds=now.microsecond)
+    return now + datetime.timedelta(minutes=five_minutes*5)
+
+
 @api_app.get("/get-rain-data")
-def get_rain(date: str):
+def get_rain(five_minutes: int):
     """
     Get the rain data for a specific date
-
-    Send date in formtat YYYY-MM-DD HH:MM
     """
-    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    dt = gen_dt(five_minutes)
     if dt.minute % 5 != 0:
         raise HTTPException(status_code=400, detail="Date must be a multiple of 5 minutes")
 
@@ -62,13 +66,11 @@ def get_rain(date: str):
 
 
 @api_app.get("/get-wind-speed")
-def get_wind_speed(date: str):
+def get_wind_speed(five_minutes: int):
     """
     Get the wind speed json from the database with the newest date.
-
-    Send date in formtat YYYY-MM-DD HH:MM
     """
-    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    dt = gen_dt(five_minutes)
     if dt.minute != 0 or dt.second != 0:
         raise HTTPException(status_code=400, detail="Wind only available hourly.")
 
@@ -86,13 +88,11 @@ def get_wind_speed(date: str):
 
 
 @api_app.get("/get-wind-direction")
-def get_wind_direction(date: str):
+def get_wind_direction(five_minutes: int):
     """
     Get the wind direction png from the database with the newest date.
-
-    Send date in formtat YYYY-MM-DD HH:MM
     """
-    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    dt = gen_dt(five_minutes)
     if dt.minute != 0 or dt.second != 0:
         raise HTTPException(status_code=400, detail="Wind only available hourly.")
 
@@ -111,13 +111,11 @@ def get_wind_direction(date: str):
 
 
 @api_app.get("/get-danger-noodle")
-def get_danger_noodle(date: str):
+def get_danger_noodle(five_minutes: int):
     """
     Get the danger areas for the given date.
-
-    Send date in format YYYY-MM-DD HH:MM
     """
-    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    dt = gen_dt(five_minutes)
     if dt.minute != 0 or dt.second != 0:
         raise HTTPException(status_code=400, detail="Wind only available hourly.")
 
