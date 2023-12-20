@@ -27,58 +27,62 @@ function is_today(date) {
     date.getFullYear() === today.getFullYear();
 }
 
-function date_string_from_slider_value(five_min) {
-  const date = new Date();
-
-  if (five_min === 0) {
-    return 'Now';
-  }
-
-  // Add slider value in minutes to date
-  date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + five_min * 5);
-
+function date_string_from_slider_value(date) {
   return `${is_today(date) ? 'Today' : 'Tomorrow'}, ${dayNames[date.getDay()]} - ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+// Map date hours into actual number words "one", "two", ... "twelve"
+function twelve_hour_string_from_date(date) {
+  const numbers = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven'];
+  const hour = date.getHours() % 12;
+  return numbers[hour]
+}
 
 const date_string = ref('');
+const twelve_hour_string = ref('');
 
-date_string.value = date_string_from_slider_value(props.five_min);
+function updates_strings (mins) {
+  if (mins === 0) {
+    date_string.value = 'Now';
+  }
 
-watch(five_minutes, (newValue) => {
-  date_string.value = date_string_from_slider_value(newValue);
-});
+  const date = new Date();
 
-const show_time_slider = ref(false);
+  // Add slider value in minutes to date
+  date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + mins * 5);
 
-function toggle_time_slider() {
-  show_time_slider.value = !show_time_slider.value;
+  date_string.value = date_string_from_slider_value(date);
+  twelve_hour_string.value = twelve_hour_string_from_date(date);
 }
+watch(five_minutes, updates_strings);
+
+updates_strings(five_minutes.value);
 </script>
 
 <template>
 <div class="map_wrapper">
   <slot></slot>
   <v-btn
-    prepend-icon="mdi-clock-time-seven-outline"
+    :prepend-icon="`mdi-clock-time-${twelve_hour_string}-outline`"
     class="time_selector ma-4"
-    @click="toggle_time_slider"
   >
     {{ date_string }}
   </v-btn>
-  <v-sheet
-    v-show="show_time_slider"
-    class="time_slider ma-4 pa-2 w-50"
-    elevation="4"
-    rounded
+  <div
+    class="time_slider ma-4 w-50"
   >
     <v-slider
       v-model="five_minutes"
       :min="0"
       :max="288"
       step="1"
+      class="pa-0 ma-0"
+      hide-details="true"
+      track-color="grey-darken-4"
+      color="white"
     ></v-slider>
-  </v-sheet>
+  </div>
   <div class="text-caption map_caption mx-4 my-1">
     <slot name="caption"></slot>
   </div>
