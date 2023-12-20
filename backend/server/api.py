@@ -144,7 +144,12 @@ app.mount("/api-v1", api_app, name="api-v1")
 
 @app.get("/{full_path:path}")
 async def serve_main(full_path: str):
-    if os.path.isfile(os.path.join(main, full_path)):
-        return FileResponse(os.path.join(main, full_path))
+    abs_path = os.path.abspath(os.path.join(main, full_path))
+    top = abs_path[:len(main)]
+    if top != main:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    if os.path.isfile(abs_path):
+        return FileResponse(abs_path)
     return FileResponse(os.path.join(main, "index.html"))
 
