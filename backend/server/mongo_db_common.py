@@ -183,3 +183,65 @@ def get_wind_direction(mongo: MongoAPI, dt: datetime):
         return WindRecord(**res)
 
     return None
+
+def get_all_wind_records_of_version(mongo: MongoAPI, version: datetime.datetime, wt: WindRecordType) -> List[WindRecord]:
+    """
+    Get all wind records of a specific version.
+
+    :param mongo: Mongodb to use
+    :param version: Version to get
+    :param wt: Wind record type (so either strength or direction)
+    """
+    records = mongo.find(collection="wind_data", filter_dict={"$and": [{"version": version}, {"type": wt}]})
+
+    res = []
+    for record in records:
+        record["_id"] = object_id_to_string(record["_id"])
+        res.append(WindRecord(**record))
+
+    return res
+
+
+def insert_danger_record(mongo: MongoAPI, record: DangerRecord) -> bson.ObjectId:
+    """
+    Insert a danger record into the database.
+    """
+    dtc = record.model_dump()
+    del dtc["record_id"]
+    dtc["rain_id"] = string_to_object_id(dtc["rain_id"])
+    dtc["wind_id"] = string_to_object_id(dtc["wind_id"])
+
+    return mongo.insert_one(collection="danger_data", document_dict=dtc)
+
+
+def get_danger_record(mongo: MongoAPI, dt: datetime.datetime) -> Union[DangerRecord, None]:
+    """
+    Get a danger record from the database.
+    """
+    assert dt.minute % 5 == 0, "dt is not a multiple of 5 minutes"
+
+    res = mongo.find_one(collection="danger_data", filter_dict={"dt": dt}, sort=[("rain_version", -1), ("wind_version", -1)])
+
+    if res is not None:
+        res["_id"] = object_id_to_string(res["_id"])
+        res["rain_id"] = object_id_to_string(res["rain_id"])
+        res["wind_id"] = object_id_to_string(res["wind_id"])
+        return DangerRecord(**res)
+
+    return None
+
+
+def get_outdated_danger_records(mongo: MongoAPI, now: datetime.datetime):
+    """
+    Get all outdated danger records.
+    """
+    records = mongo.find(collection="danger_data", filter_dict={"dt": {"$lt": now}})
+
+    res = []
+    for record in records:
+        record["_id"] = object_id_to_string(record["_id"])
+        record["rain_id"] = object_id_to_string(record["rain_id"])
+        record["wind_id"] = object_id_to_string(record["wind_id"])
+        res.append(DangerRecord(**record))
+
+    return res
