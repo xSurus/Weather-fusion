@@ -395,13 +395,13 @@ def regenerate_danger():
         while cur_time < end_time:
             rain_record = mdbc.get_rain_record(mongo, cur_time)
 
-            if mdbc.danger_entry_exists(cur_time, rain_record.record_id, record.record_id, mongo):
-                cur_time += datetime.timedelta(minutes=5)
-                continue
-
             # this shouldn't happen
             if rain_record is None:
                 warnings.warn("Rain record is None")
+                cur_time += datetime.timedelta(minutes=5)
+                continue
+
+            if mdbc.danger_entry_exists(cur_time, rain_record.record_id, record.record_id, mongo):
                 cur_time += datetime.timedelta(minutes=5)
                 continue
 
