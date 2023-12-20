@@ -390,10 +390,10 @@ def regenerate_danger():
         with open(wind_path, "r") as f:
             wind_data = json.load(f)
 
-        wind_green = list(filter(lambda x: x["properties"]["color"] == "#ffffff" or x["properties"]["color"] == "#cccccc" or x["properties"]["color"] == "ffffff",
+        wind_green = list(filter(lambda x: "cccccc" in x["properties"]["color"] or "ffffff" in x["properties"]["color"],
                                  wind_data["features"]))
-        wind_yellow = list(filter(lambda x: x["properties"]["color"] == "#59cc00", wind_data["features"]))
-        wind_red = list(filter(lambda x: x["properties"]["color"] == "#90cc00", wind_data["features"]))
+        wind_yellow = list(filter(lambda x: "59cc00" in x["properties"]["color"], wind_data["features"]))
+        wind_red = list(filter(lambda x: "90cc00" in x["properties"]["color"], wind_data["features"]))
 
         # Go over range and regenerate the danger data
         while cur_time < end_time:
