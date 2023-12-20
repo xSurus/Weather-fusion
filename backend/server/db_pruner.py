@@ -1,3 +1,4 @@
+import datetime
 import os
 import json
 import time
@@ -42,7 +43,27 @@ def remove_rain(records: List[RainRecord], rain_type: str):
     print(f"Deleted {db_count} {rain_type} entries from the database and {file_count} files from the storage")
 
 
-def prune_prediction():
+def remove_wind(records: List[WindRecord]):
+    db_count = 0
+    file_count = 0
+
+    for entry in records:
+        if entry.type == WindRecordType.strength:
+            p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.json")
+        elif entry.type == WindRecordType.direction:
+            p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.png")
+        else:
+            raise ValueError(f"Unknown wind record type: {entry.type}")
+
+        if os.path.exists(p):
+            os.remove(p)
+            file_count += 1
+
+        db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
+    print(f"Deleted {db_count} wind entries from the database and {file_count} files from the storage")
+
+
+def prune_rain_prediction():
     """
     Get all the outdated predictions and delete them
     """
@@ -60,8 +81,15 @@ def prune_radar():
     remove_rain(entries, "rain radar")
 
 
+def prune_wind():
+    now = datetime.datetime.now(datetime.UTC)
+    entries = mdbc.get_outdated_wind_prediction_entries(mongo, now)
+    remove_wind(entries)
+
+
 if __name__ == "__main__":
     while True:
         prune_radar()
-        prune_prediction()
+        prune_rain_prediction()
+        prune_wind()
         time.sleep(1800)
