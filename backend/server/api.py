@@ -111,10 +111,28 @@ def get_wind_direction(date: str):
 
 
 @api_app.get("/get-danger-noodle")
-def get_danger_noodle(data: str):
+def get_danger_noodle(date: str):
     """
     Get the danger areas for the given date.
+
+    Send date in format YYYY-MM-DD HH:MM
     """
+    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    if dt.minute != 0 or dt.second != 0:
+        raise HTTPException(status_code=400, detail="Wind only available hourly.")
+
+    # check if it exists in the radar data:
+    record = mdbc.get_danger_record(mongo, dt)
+    if record is None:
+        raise HTTPException(404, "Record not found")
+
+    path = os.path.join(storage_path, "storage", f"{record.record_id}.json")
+
+    if os.path.exists(path):
+        return FileResponse(path)
+
+    raise HTTPException(status_code=500, detail="Data not found")
+
 
 main = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "webinterface",
                     "dist")
