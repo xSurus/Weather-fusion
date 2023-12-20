@@ -63,9 +63,9 @@ def request_rain_prediction_data(dt: datetime.datetime, version: datetime.dateti
     return rsp.status_code, None
 
 
-def request_wind_prediction_data(dt: datetime.datetime,
-                                 version: datetime.datetime,
-                                 rt: RecordType) -> Tuple[int, Union[dict, None]]:
+def request_wind_prediction_strength(dt: datetime.datetime,
+                                     version: datetime.datetime,
+                                     rt: RecordType) -> Tuple[int, Union[dict, None]]:
     """
     Request the prediction data for a given datetime and provided a specific output version
     """
@@ -85,9 +85,9 @@ def request_wind_prediction_data(dt: datetime.datetime,
     return rsp.status_code, None
 
 
-def request_wind_direction_data(dt: datetime.datetime,
-                                version: datetime.datetime,
-                                rt: RecordType) -> Tuple[int, Union[bytes, None]]:
+def request_wind_direction_direction(dt: datetime.datetime,
+                                     version: datetime.datetime,
+                                     rt: RecordType) -> Tuple[int, Union[bytes, None]]:
     """
     Request the prediction data for a given datetime and provided a specific output version
     """
@@ -140,8 +140,13 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
                                                         microseconds=update_time.microsecond)
                        + datetime.timedelta(minutes=5))
 
+    end_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+                                                        seconds=update_time.second,
+                                                        microseconds=update_time.microsecond)
+                       + datetime.timedelta(days=2))
+
     # Get the prediction for as long as they come and insert into the database
-    while True:
+    while next_prediction < end_prediction:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
         st, js = request_rain_prediction_data(next_prediction, version)
 
@@ -167,13 +172,10 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
                 version=version
             )
 
-            record.record_id = mdbc.insert_prediction_record(mongo, record)
+            record.record_id = object_id_to_string(mdbc.insert_prediction_record(mongo, record))
 
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
-                                               f"{object_id_to_string(record.record_id)}.json"))
-
-        else:
-            break
+                                               f"{record.record_id}.json"))
 
         next_prediction += datetime.timedelta(minutes=5)
 
@@ -181,23 +183,30 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
 
 
 def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.datetime):
+    """
+    Update the prediction data for the wind at 10m height
+    """
     next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
                                                         seconds=update_time.second,
                                                         microseconds=update_time.microsecond)
                        + datetime.timedelta(minutes=5))
 
+    end_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+                                                        seconds=update_time.second,
+                                                        microseconds=update_time.microsecond)
+                       + datetime.timedelta(days=2))
+
     # Get the prediction for as long as they come and insert into the database
-    while True:
+    while next_prediction < end_prediction:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
-        st, js = request_rain_prediction_data(next_prediction, version)
+        st, js = request_wind_prediction_strength(next_prediction, version, rt=RecordType.wind_10m)
 
         # Successful request
         if st == 200:
-
             assert js is not None, "js is None from meteoswiss prediction response"
             store_path = os.path.join(server_config.data_home, "storage", "temp.json")
 
-            print(f"Got Prediction: {next_prediction.strftime('%Y%m%d_%H%M')}")
+            print(f"Got Prediction Strength 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
 
             # Transform the MeteoData to GeoJSON
             transformed = decode_geojson(js)
@@ -206,20 +215,53 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
             with open(store_path, "w") as f:
                 json.dump(transformed, f)
 
-            record = RainRecord(
+            record = WindRecord(
                 dt=next_prediction,
-                type="prediction",
+                type="strength",
                 processed=True,
                 version=version
             )
 
-            record.record_id = mdbc.insert_prediction_record(mongo, record)
+            record.record_id = object_id_to_string(mdbc.insert_wind_record(mongo, record))
 
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
-                                               f"{object_id_to_string(record.record_id)}.json"))
+                                               f"{record.record_id}.json"))
 
-        else:
-            break
+        next_prediction += datetime.timedelta(minutes=5)
+
+    # Get the pngs.
+    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+                                                        seconds=update_time.second,
+                                                        microseconds=update_time.microsecond)
+                       + datetime.timedelta(minutes=5))
+
+    # Get the prediction for as long as they come and insert into the database
+    while next_prediction < end_prediction:
+        assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
+        st, img_data = request_wind_prediction_strength(next_prediction, version, rt=RecordType.wind_10m)
+
+        # Successful request
+        if st == 200:
+            assert img_data is not None, "js is None from meteoswiss prediction response"
+            store_path = os.path.join(server_config.data_home, "storage", "temp.png")
+
+            print(f"Got Prediction Direction 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
+
+            # Write to File
+            with open(store_path, "w") as f:
+                json.dump(img_data, f)
+
+            record = WindRecord(
+                dt=next_prediction,
+                type="direction",
+                processed=True,
+                version=version
+            )
+
+            record.record_id = object_id_to_string(mdbc.insert_wind_record(mongo, record))
+
+            os.rename(store_path, os.path.join(server_config.data_home, "storage",
+                                               f"{record.record_id}.png"))
 
         next_prediction += datetime.timedelta(minutes=5)
 
@@ -251,7 +293,7 @@ def crawl_wind_prediction(update_time: datetime.datetime):
 
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
-        update_rain_prediction(version=new_version, update_time=update_time)
+        update_wind_10_prediction(version=new_version, update_time=update_time)
 
 
 def crawl_radar(update_time: datetime.datetime):
@@ -303,6 +345,7 @@ if __name__ == "__main__":
     while True:
         update_dt = datetime.datetime.now(datetime.UTC)
         crawl_radar(update_time=update_dt)
+        crawl_wind_prediction(update_time=update_dt)
         crawl_rain_prediction(update_time=update_dt)
         print("Sleeping for 5 minutes")
         time.sleep(300)
