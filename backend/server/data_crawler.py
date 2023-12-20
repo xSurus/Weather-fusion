@@ -434,7 +434,7 @@ def regenerate_danger():
             full_red = update_set_color(red, "#ff0000")
 
             # Fill danger object
-            temp_danger["features"] = full_green + full_yellow + full_red
+            temp_danger["features"] = [full_green[0]] + full_yellow + full_green[1:] + full_red
 
             # write to disk
             store_path = os.path.join(server_config.data_home, "storage", f"temp.json")
