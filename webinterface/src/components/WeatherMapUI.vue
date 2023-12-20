@@ -73,54 +73,23 @@ watch(tab, (newVal, OldVal) => {
 
 const dateSlider = ref(0);
 
-const fiveMinutesInADay = 288;
+function date_slider_change(val) {
+  dateSlider.value = val;
+}
 </script>
 
 <template>
 <v-window v-model="tab" class="h-100">
   <v-window-item value="windy" class="h-100">
-    <WindyMap ref="windy" :five_min="dateSlider" :initial_view="map_view"></WindyMap>
+    <WindyMap ref="windy" v-model:five_min="dateSlider" :initial_view="map_view"></WindyMap>
   </v-window-item>
   <v-window-item value="rain" class="h-100">
-    <RainMap ref="rain" :five_min="dateSlider" :initial_view="map_view"></RainMap>
+    <RainMap ref="rain" v-model:five_min="dateSlider" :initial_view="map_view"></RainMap>
   </v-window-item>
   <v-window-item value="danger" class="h-100">
-    <DangerMap ref="danger" :five_min="dateSlider" :initial_view="map_view"></DangerMap>
+    <DangerMap ref="danger" v-model:five_min="dateSlider" :initial_view="map_view"></DangerMap>
   </v-window-item>
 </v-window>
-            <!--<v-col cols="12" class="pt-0 mt-0">
-              <v-slider
-                color="primary"
-                thumb-color="white"
-                track-color="grey-darken-2"
-                v-model="dateSlider"
-                :max="fiveMinutesInADay"
-                :min="0"
-                step="1"
-              >
-              </v-slider>
-            </v-col>-->
-      <!--<v-sheet
-        color="grey-darken-4"
-        rounded
-        class="pa-6"
-        :elevation="5"
-      >
-        <v-tabs
-          v-model="tab"
-          direction="vertical"
-        >
-          <v-tab value="windy">
-            Windy
-          </v-tab>
-          <v-tab value="rain">
-            Rain
-          </v-tab>
-          <v-tab value="danger">
-            Danger
-          </v-tab>
-        </v-tabs>
-      </v-sheet>-->
 </template>
 
 <style scoped>

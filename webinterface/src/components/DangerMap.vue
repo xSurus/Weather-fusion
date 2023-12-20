@@ -57,33 +57,28 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   //   bounds: [[45.398181, 5.140242], [48.230651, 11.47757]]
   // }).addTo(map);
 
-  let heightmap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
-  });
-  heightmap.addTo(map);
-
   map.createPane('labels');
   map.getPane('labels').style.zIndex = 650;
   map.getPane('labels').style.pointerEvents = 'none';
+
+  var hillshade = L.tileLayer('https://api.maptiler.com/tiles/hillshade/{z}/{x}/{y}.{ext}?key=vTloRxftNUtxWqKm2U6S', {
+    pane: 'labels',
+    ext: 'webp'
+  });
 
   var positronLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
     pane: 'labels',
     ext: 'png'
   });
 
+  hillshade.addTo(map);
   positronLabels.addTo(map);
 
   function cloud_style(feature) {
-    if (feature.properties.color === undefined || feature.properties.color == "#ffffff") {
-      return {
-        fillColor: '#FFF8F6',
-        weight: 0,
-        fillOpacity: 0.8
-      };
-    }
     return {
       fillColor: feature.properties.color,
       weight: 0,
-      fillOpacity: 0.6
+      fillOpacity: 1
     };
   }
 
@@ -93,7 +88,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
   L.geoJSON(swiss_boundries, {
     style: {
-      color: '#fff',
+      color: '#000',
       weight: 2,
       fillOpacity: 0
     }
@@ -101,7 +96,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
   L.geoJSON(kanton_boundries, {
     style: {
-      color: '#aaa',
+      color: '#000',
       weight: 1,
       fillOpacity: 0
     }

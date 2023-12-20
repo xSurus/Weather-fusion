@@ -4,6 +4,7 @@ import geojson from "@/assets/example_geo_json";
 import swiss_boundries from "@/assets/swiss_boundries";
 import kanton_boundries from "@/assets/kanton_boundries";
 import MapWrapper from "@/components/MapWrapper.vue";
+import {computed} from "vue";
 
 const props = defineProps({
   five_min: {
@@ -18,6 +19,17 @@ const props = defineProps({
         zoom: 8,
       };
     },
+  },
+});
+
+const emit = defineEmits(['update:five_min']);
+
+const five_minutes = computed({
+  get() {
+    return props.five_min;
+  },
+  set(value) {
+    emit('update:five_min', value);
   },
 });
 
@@ -108,7 +120,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 </script>
 
 <template>
-<MapWrapper :five_min="props.five_min">
+<MapWrapper v-model:five_min="five_minutes">
   <div id="rain"></div>
   <template #caption>
     &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.maptiler.com/copyright/" target="_blank"> MapTiler</a> &copy; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>
