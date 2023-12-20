@@ -248,3 +248,14 @@ def get_outdated_danger_records(mongo: MongoAPI, now: datetime.datetime):
         res.append(DangerRecord(**record))
 
     return res
+
+
+def danger_entry_exists(dt: datetime.datetime, rain_id: str, wind_id: str, mongo: MongoAPI) -> bool:
+    """
+    Check if a danger entry exists.
+    """
+    res = mongo.find_one(collection="danger_data", filter_dict={"$and": [{"dt": dt},
+                                                                         {"rain_id": string_to_object_id(rain_id)},
+                                                                         {"wind_id": string_to_object_id(wind_id)}]})
+
+    return res is not None
