@@ -427,11 +427,11 @@ def regenerate_danger():
             temp_danger = {"type": "FeatureCollection", "features": []}
 
             # build danger from rain and wind
-            full_green = update_set_color(copy.deepcopy(wind_green), "00ff00")
+            full_green = update_set_color(copy.deepcopy(wind_green), "#00ff00")
             yellow.extend(copy.deepcopy(wind_yellow))
-            full_yellow = update_set_color(yellow, "ffff00")
+            full_yellow = update_set_color(yellow, "#ffff00")
             red.extend(copy.deepcopy(wind_red))
-            full_red = update_set_color(red, "ff0000")
+            full_red = update_set_color(red, "#ff0000")
 
             # Fill danger object
             temp_danger["features"] = full_green + full_yellow + full_red
