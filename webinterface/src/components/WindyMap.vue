@@ -102,7 +102,7 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 </script>
 
 <template>
-<MapWrapper v-model:five_min="five_minutes">
+<MapWrapper v-model:five_min="five_minutes" type="windy">
   <div id="windy"></div>
   <template #caption>
     Note that windy only updates it's map every hour.
