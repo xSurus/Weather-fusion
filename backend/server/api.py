@@ -1,6 +1,7 @@
 import json
 import os
 import datetime
+import warnings
 
 import pytz
 from fastapi import FastAPI, HTTPException
@@ -57,8 +58,63 @@ def get_rain(date: str):
     if os.path.exists(path):
         return FileResponse(path)
 
-    raise HTTPException(status_code=404, detail="No data for this date")
+    raise HTTPException(status_code=500, detail="Data not found")
 
+
+@api_app.get("/get-wind-speed")
+def get_wind_speed(date: str):
+    """
+    Get the wind speed json from the database with the newest date.
+
+    Send date in formtat YYYY-MM-DD HH:MM
+    """
+    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    if dt.minute != 0 or dt.second != 0:
+        raise HTTPException(status_code=400, detail="Wind only available hourly.")
+
+    # check if it exists in the radar data:
+    record = mdbc.get_wind_speed(mongo, dt)
+    if record is None:
+        raise HTTPException(404, "Record not found")
+
+    path = os.path.join(storage_path, "storage", f"{record.record_id}.json")
+
+    if os.path.exists(path):
+        return FileResponse(path)
+
+    raise HTTPException(status_code=500, detail="Data not found")
+
+
+@api_app.get("/get-wind-direction")
+def get_wind_direction(date: str):
+    """
+    Get the wind direction png from the database with the newest date.
+
+    Send date in formtat YYYY-MM-DD HH:MM
+    """
+    dt = pytz.utc.localize(datetime.datetime.strptime(date, "%Y-%m-%d %H:%M"))
+    if dt.minute != 0 or dt.second != 0:
+        raise HTTPException(status_code=400, detail="Wind only available hourly.")
+
+    # check if it exists in the radar data:
+    record = mdbc.get_wind_direction(mongo, dt)
+    if record is None:
+        raise HTTPException(404, "Record not found")
+
+    path = os.path.join(storage_path, "storage", f"{record.record_id}.png")
+
+    if os.path.exists(path):
+        warnings.warn("Sending png file - will switch to geojson soon")
+        return FileResponse(path)
+
+    raise HTTPException(status_code=500, detail="Data not found")
+
+
+@api_app.get("/get-danger-noodle")
+def get_danger_noodle(data: str):
+    """
+    Get the danger areas for the given date.
+    """
 
 main = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "webinterface",
                     "dist")
