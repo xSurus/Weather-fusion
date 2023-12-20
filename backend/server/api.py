@@ -144,5 +144,7 @@ app.mount("/api-v1", api_app, name="api-v1")
 
 @app.get("/{full_path:path}")
 async def serve_main(full_path: str):
+    if os.path.isfile(os.path.join(main, full_path)):
+        return FileResponse(os.path.join(main, full_path))
     return FileResponse(os.path.join(main, "index.html"))
 
