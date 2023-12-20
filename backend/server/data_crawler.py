@@ -63,32 +63,22 @@ def request_rain_prediction_data(dt: datetime.datetime, version: datetime.dateti
     return rsp.status_code, None
 
 
-def get_next_rain_prediction(dt: Union[datetime.datetime, None]):
+def get_next_prediction(dt: Union[datetime.datetime, None], rt: RecordType):
     """
-    Find the next prediction output if it exists, otherwise return the current one
-    """
-    resp = rq.get("https://www.meteoswiss.admin.ch/product/output/versions.json")
-
-    if resp.ok:
-        content = resp.json()
-        target_dt = content.get("inca/precipitation/rate")
-
-        new_dt = pytz.utc.localize(datetime.datetime.strptime(target_dt, "%Y%m%d_%H%M"))
-        if dt is None or new_dt > dt:
-            return new_dt
-
-    return dt
-
-
-def get_next_wind_prediction(dt: Union[datetime.datetime, None]):
-    """
-    Get the next wind prediction from the meteoswiss website
+    Get next prediction
     """
     resp = rq.get("https://www.meteoswiss.admin.ch/product/output/versions.json")
 
     if resp.ok:
         content = resp.json()
-        target_dt = content.get("cosmo/wind-10m/images")
+        if rt == RecordType.rain:
+            target_dt = content.get("inca/precipitation/rate")
+        elif rt == RecordType.wind_10m:
+            target_dt = content.get("cosmo/wind-10m/images")
+        elif rt == RecordType.wind_2000m:
+            target_dt = content.get("cosmo/wind-2000m/images")
+        else:
+            raise ValueError("Unknown RecordType")
 
         new_dt = pytz.utc.localize(datetime.datetime.strptime(target_dt, "%Y%m%d_%H%M"))
         if dt is None or new_dt > dt:
@@ -153,7 +143,7 @@ def crawl_prediction(update_time: datetime.datetime):
     old_prediction = mdbc.get_rain_prediction_version(mongo)
 
     # check the next prediction
-    new_version = get_next_rain_prediction(old_prediction)
+    new_version = get_next_prediction(old_prediction, RecordType.rain)
 
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
