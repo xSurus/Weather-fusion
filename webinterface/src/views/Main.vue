@@ -30,6 +30,16 @@ function select_map(name) {
     color="grey-darken-4"
     density="compact"
   >
+    <v-avatar
+      size="36"
+      class="ml-4"
+    >
+      <v-img
+        src="/logo_white.png"
+        max-height="48"
+        max-width="48"
+      ></v-img>
+    </v-avatar>
     <v-app-bar-title>Weather Fusion</v-app-bar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
@@ -44,5 +54,4 @@ function select_map(name) {
 </template>
 
 <style scoped>
-
 </style>
