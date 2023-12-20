@@ -43,17 +43,21 @@ const date_string = ref('');
 const twelve_hour_string = ref('');
 
 function updates_strings (mins) {
-  if (mins === 0) {
-    date_string.value = 'Now';
-  }
+
 
   const date = new Date();
 
   // Add slider value in minutes to date
   date.setMinutes(Math.round(date.getMinutes() / 5) * 5 + mins * 5);
 
-  date_string.value = date_string_from_slider_value(date);
   twelve_hour_string.value = twelve_hour_string_from_date(date);
+
+  if (mins === 0) {
+    date_string.value = 'Now';
+    return;
+  }
+
+  date_string.value = date_string_from_slider_value(date);
 }
 watch(five_minutes, updates_strings);
 
@@ -126,10 +130,13 @@ updates_strings(five_minutes.value);
   bottom: 0;
   right: 0;
   z-index: 1000;
+  color: white;
+  mix-blend-mode: difference;
 }
 
 .text-caption :deep(a) {
-  color: #fff;
+  color: white;
+  mix-blend-mode: difference;
   text-decoration: none;
 }
 
