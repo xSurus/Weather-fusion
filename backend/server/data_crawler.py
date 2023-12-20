@@ -188,10 +188,9 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
     """
     Update the prediction data for the wind at 10m height
     """
-    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute,
-                                                        seconds=update_time.second,
-                                                        microseconds=update_time.microsecond)
-                       + datetime.timedelta(hours=1))
+    next_prediction = update_time - datetime.timedelta(minutes=update_time.minute,
+                                                       seconds=update_time.second,
+                                                       microseconds=update_time.microsecond)
 
     end_prediction = (update_time - datetime.timedelta(minutes=update_time.minute,
                                                        seconds=update_time.second,
