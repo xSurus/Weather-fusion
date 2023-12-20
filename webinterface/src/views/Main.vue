@@ -17,7 +17,7 @@ const views = ref([
   },
 ]);
 
-const selected_view = ref('wind');
+const selected_view = ref('windy');
 function select_map(name) {
   selected_view.value = name;
 }
@@ -43,8 +43,13 @@ function select_map(name) {
     <v-app-bar-title>Weather Fusion</v-app-bar-title>
     <v-spacer></v-spacer>
     <v-toolbar-items>
-      <v-btn v-for="item in views" :key="item.name" text @click="select_map(item.name)">
-        {{ item.name }}
+      <v-btn
+        v-for="item in views"
+        :key="item.name"
+        @click="select_map(item.name)"
+        :variant="item.name === selected_view ? 'tonal' : 'text'"
+      >
+        {{ item.title }}
       </v-btn>
     </v-toolbar-items>
   </v-app-bar>
