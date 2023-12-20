@@ -3,7 +3,7 @@ import { loadScript } from "vue-plugin-load-script";
 import swiss_boundries from "@/assets/swiss_boundries";
 import kanton_boundries from "@/assets/kanton_boundries";
 import MapWrapper from "@/components/MapWrapper.vue";
-import {computed} from "vue";
+import {computed, watch} from "vue";
 
 const props = defineProps({
   five_min: {
@@ -32,6 +32,10 @@ const five_minutes = computed({
   },
 });
 
+watch(five_minutes, () => {
+  update_cloud_layer();
+});
+
 let leaflet_map = null;
 
 function get_map_view() {
@@ -50,6 +54,36 @@ defineExpose({
   get_map_view,
   set_map_view,
 });
+
+let cloud_layer = null;
+
+function update_cloud_layer() {
+  fetch('/api-v1/get-rain-data?' + new URLSearchParams({
+    five_minutes: five_minutes.value,
+  }), {
+    method: 'GET'
+  }).then((response) => {
+    if (response.ok) {
+      try {
+        return response.json();
+      } catch (e) {
+        throw new Error('Something went wrong decoding the response');
+      }
+    } else {
+      throw new Error('Something went wrong with the request');
+    }
+  }).then(data => {
+    if (cloud_layer) {
+      leaflet_map.remove();
+    }
+    let clouds = L.geoJSON(data, {style: cloud_style});
+
+    clouds.addTo(leaflet_map);
+    cloud_layer = clouds;
+  }).catch(error => {
+    console.error(error);
+  });
+}
 
 loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 .then(() => {
@@ -81,12 +115,12 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
 
   hillshade.addTo(map);
 
-  var positronLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
+  var positionLabels = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}{r}.{ext}', {
     pane: 'labels',
     ext: 'png'
   });
 
-  positronLabels.addTo(map);
+  positionLabels.addTo(map);
 
   function cloud_style(feature) {
     return {
@@ -96,27 +130,8 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
     };
   }
 
-  fetch('/api-v1/get-rain-data?' + new URLSearchParams({
-    five_minutes: five_minutes.value,
-  }), {
-    method: 'GET'
-  }).then((response) => {
-    if (response.ok) {
-      try {
-        return response.json();
-      } catch (e) {
-        throw new Error('Something went wrong decoding the response');
-      }
-    } else {
-      throw new Error('Something went wrong with the request');
-    }
-  }).then(data => {
-    let clouds = L.geoJSON(data, {style: cloud_style});
+  update_cloud_layer();
 
-    clouds.addTo(map);
-  }).catch(error => {
-    console.error(error);
-  });
   L.geoJSON(swiss_boundries, {
     style: {
       color: '#000',
