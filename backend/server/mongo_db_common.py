@@ -112,6 +112,7 @@ def get_outdated_wind_prediction_entries(mongo: MongoAPI, now) -> List[WindRecor
     """
     Get the outdated wind records and return them (only based on the datetime of the record - not version)
     """
+    # TODO can be improved to only retain one entry per time. (only the newest version)
     records = mongo.find(collection="wind_data", filter_dict={"dt": {"$lt": now}})
 
     res = []
@@ -184,6 +185,7 @@ def get_wind_direction(mongo: MongoAPI, dt: datetime):
 
     return None
 
+
 def get_all_wind_records_of_version(mongo: MongoAPI, version: datetime.datetime, wt: WindRecordType) -> List[WindRecord]:
     """
     Get all wind records of a specific version.
@@ -235,6 +237,7 @@ def get_outdated_danger_records(mongo: MongoAPI, now: datetime.datetime):
     """
     Get all outdated danger records.
     """
+    # TODO can be improved to only retain one entry per time. (only the newest version)
     records = mongo.find(collection="danger_data", filter_dict={"dt": {"$lt": now}})
 
     res = []
