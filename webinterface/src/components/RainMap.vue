@@ -114,6 +114,10 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   map.getPane('labels').style.zIndex = 650;
   map.getPane('labels').style.pointerEvents = 'none';
 
+  map.createPane('borders');
+  map.getPane('borders').style.zIndex = 649;
+  map.getPane('borders').style.pointerEvents = 'none';
+
 
 
   var hillshade = L.tileLayer('https://api.maptiler.com/tiles/hillshade/{z}/{x}/{y}.{ext}?key=vTloRxftNUtxWqKm2U6S', {
@@ -137,7 +141,8 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       color: '#000',
       weight: 2,
       fillOpacity: 0
-    }
+    },
+    pane: 'borders'
   }).addTo(map);
 
   L.geoJSON(kanton_boundries, {
@@ -145,7 +150,8 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
       color: '#000',
       weight: 1,
       fillOpacity: 0
-    }
+    },
+    pane: 'borders'
   }).addTo(map);
 });
 </script>
