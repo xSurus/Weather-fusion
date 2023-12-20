@@ -185,15 +185,15 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
     """
     Update the prediction data for the wind at 10m height
     """
-    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute,
                                                         seconds=update_time.second,
                                                         microseconds=update_time.microsecond)
-                       + datetime.timedelta(minutes=5))
+                       + datetime.timedelta(hours=1))
 
-    end_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
-                                                        seconds=update_time.second,
-                                                        microseconds=update_time.microsecond)
-                       + datetime.timedelta(days=2))
+    end_prediction = (update_time - datetime.timedelta(minutes=update_time.minute,
+                                                       seconds=update_time.second,
+                                                       microseconds=update_time.microsecond)
+                      + datetime.timedelta(days=2))
 
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
@@ -226,13 +226,13 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
                                                f"{record.record_id}.json"))
 
-        next_prediction += datetime.timedelta(minutes=5)
+        next_prediction += datetime.timedelta(hours=1)
 
     # Get the pngs.
-    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
+    next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute,
                                                         seconds=update_time.second,
                                                         microseconds=update_time.microsecond)
-                       + datetime.timedelta(minutes=5))
+                       + datetime.timedelta(hours=1))
 
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
