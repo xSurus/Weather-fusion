@@ -247,8 +247,8 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
             print(f"Got Prediction Direction 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
 
             # Write to File
-            with open(store_path, "w") as f:
-                json.dump(img_data, f)
+            with open(store_path, "wb") as f:
+                f.write(img_data)
 
             record = WindRecord(
                 dt=next_prediction,
