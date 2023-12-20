@@ -2,6 +2,9 @@ import datetime
 import json
 import os.path
 import time
+import warnings
+import copy
+
 import pytz
 import requests as rq
 from typing import Tuple, Union
@@ -355,7 +358,94 @@ def update_set_color(data: list, color: str):
 
 
 def regenerate_danger():
-    pass
+    """
+    Regenerate the danger data.
+    """
+    latest_rain = mdbc.get_rain_prediction_version(mongo)
+    latest_wind = mdbc.get_wind_prediction_version(mongo)
+
+    assert latest_rain is not None, "latest_rain is None"
+    assert latest_wind is not None, "latest_wind is None"
+
+    wind_records = mdbc.get_all_wind_records_of_version(mongo, latest_wind, WindRecordType.strength)
+
+    # Loop over wind records
+    for record in wind_records:
+
+        # Get valid range of a given wind record
+        cur_time = pytz.utc.localize(record.dt)
+        assert cur_time.minute == 0, "start_time is not a multiple of 5 minutes"
+        end_time = pytz.utc.localize(record.dt) + datetime.timedelta(hours=1)
+
+        # make sure the wind data exists
+        wind_path = os.path.join(server_config.data_home, "storage", f"{record.record_id}.json")
+        if not os.path.exists(wind_path):
+            warnings.warn("Wind record does not exist")
+            continue
+
+        with open(wind_path, "r") as f:
+            wind_data = json.load(f)
+
+        wind_green = list(filter(lambda x: x["properties"]["color"] == "#ffffff" or x["properties"]["color"] == "#cccccc" or x["properties"]["color"] == "ffffff",
+                                 wind_data["features"]))
+        wind_yellow = list(filter(lambda x: x["properties"]["color"] == "#59cc00", wind_data["features"]))
+        wind_red = list(filter(lambda x: x["properties"]["color"] == "#90cc00", wind_data["features"]))
+
+        # Go over range and regenerate the danger data
+        while cur_time < end_time:
+            rain_record = mdbc.get_rain_record(mongo, cur_time)
+
+            # this shouldn't happen
+            if rain_record is None:
+                warnings.warn("Rain record is None")
+                continue
+
+            # make sure the wind data exists
+            rain_path = os.path.join(server_config.data_home, "storage", f"{rain_record.record_id}.json")
+            if not os.path.exists(rain_path):
+                warnings.warn("Rain record does not exist")
+                continue
+
+            with open(rain_path, "r") as f:
+                rain_data = json.load(f)
+
+            # Extract yellow and red feature from rain
+            yellow = list(filter(lambda x: x["properties"]["color"] == "#9a7e95", rain_data["features"]))
+            red = list(filter(lambda x: x["properties"]["color"] == "#0001fc", rain_data["features"]))
+
+            # Create object for danger
+            temp_danger = {"type": "FeatureCollection", "features": []}
+
+            # build danger from rain and wind
+            full_green = update_set_color(copy.deepcopy(wind_green), "00ff00")
+            yellow.extend(copy.deepcopy(wind_yellow))
+            full_yellow = update_set_color(yellow, "ffff00")
+            red.extend(copy.deepcopy(wind_red))
+            full_red = update_set_color(red, "ff0000")
+
+            # Fill danger object
+            temp_danger["features"] = full_green + full_yellow + full_red
+
+            # write to disk
+            store_path = os.path.join(server_config.data_home, "storage", f"temp.json")
+            with open(store_path, "w") as f:
+                json.dump(temp_danger, f)
+
+            # Insert into database
+            dr = DangerRecord(
+                dt=cur_time,
+                wind_id=record.record_id,
+                rain_id=rain_record.record_id,
+                wind_version=record.version,
+                rain_version=rain_record.version
+            )
+
+            print("Added Danger Record for ", cur_time)
+            dr.record_id = object_id_to_string(mdbc.insert_danger_record(mongo, dr))
+            os.rename(store_path, os.path.join(server_config.data_home, "storage",
+                                               f"{dr.record_id}.json"))
+
+            cur_time += datetime.timedelta(minutes=5)
 
 
 if __name__ == "__main__":
