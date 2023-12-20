@@ -63,6 +63,50 @@ def request_rain_prediction_data(dt: datetime.datetime, version: datetime.dateti
     return rsp.status_code, None
 
 
+def request_wind_prediction_data(dt: datetime.datetime,
+                                 version: datetime.datetime,
+                                 rt: RecordType) -> Tuple[int, Union[dict, None]]:
+    """
+    Request the prediction data for a given datetime and provided a specific output version
+    """
+    dts = dt.strftime("%Y%m%d_%H%M")
+    vss = version.strftime("%Y%m%d_%H%M")
+    if rt == RecordType.wind_10m:
+        url = f"https://www.meteoschweiz.admin.ch/product/output/cosmo/wind-10m/images/version__{vss}/wind-10m_{dts}.json"
+    elif rt == RecordType.wind_2000m:
+        url = f"https://www.meteoschweiz.admin.ch/product/output/cosmo/wind-2000m/images/version__{vss}/wind-2000m_{dts}.json"
+    else:
+        raise ValueError("Unknown RecordType")
+
+    rsp = rq.request("GET", url)
+    if rsp.ok:
+        return rsp.status_code, rsp.json()
+
+    return rsp.status_code, None
+
+
+def request_wind_direction_data(dt: datetime.datetime,
+                                version: datetime.datetime,
+                                rt: RecordType) -> Tuple[int, Union[bytes, None]]:
+    """
+    Request the prediction data for a given datetime and provided a specific output version
+    """
+    dts = dt.strftime("%Y%m%d_%H%M")
+    vss = version.strftime("%Y%m%d_%H%M")
+    if rt == RecordType.wind_10m:
+        url = f"https://www.meteoschweiz.admin.ch/product/output/cosmo/wind-10m/images/version__{vss}/wind-10m_{dts}.png"
+    elif rt == RecordType.wind_2000m:
+        url = f"https://www.meteoschweiz.admin.ch/product/output/cosmo/wind-2000m/images/version__{vss}/wind-2000m_{dts}.png"
+    else:
+        raise ValueError("Unknown RecordType")
+
+    rsp = rq.request("GET", url)
+    if rsp.ok:
+        return rsp.status_code, rsp.content
+
+    return rsp.status_code, None
+
+
 def get_next_prediction(dt: Union[datetime.datetime, None], rt: RecordType):
     """
     Get next prediction
@@ -87,7 +131,7 @@ def get_next_prediction(dt: Union[datetime.datetime, None], rt: RecordType):
     return dt
 
 
-def update_prediction(version: datetime.datetime, update_time: datetime.datetime):
+def update_rain_prediction(version: datetime.datetime, update_time: datetime.datetime):
     """
     Update the prediction data
     """
@@ -136,7 +180,7 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
     print("Done with prediction")
 
 
-def crawl_prediction(update_time: datetime.datetime):
+def crawl_rain_prediction(update_time: datetime.datetime):
     """
     Crawl Radar Prediction.
     """
@@ -196,6 +240,6 @@ if __name__ == "__main__":
     while True:
         update_dt = datetime.datetime.now()
         crawl_radar(update_time=update_dt)
-        crawl_prediction(update_time=update_dt)
+        crawl_rain_prediction(update_time=update_dt)
         print("Sleeping for 5 minutes")
         time.sleep(300)
