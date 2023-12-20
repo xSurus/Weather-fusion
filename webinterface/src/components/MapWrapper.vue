@@ -91,12 +91,31 @@ updates_strings(five_minutes.value);
     <slot name="caption"></slot>
   </div>
   <v-sheet
-    class="legend ma-4"
+    class="legend ma-4 pa-4"
     color=""
     rounded
     elevation="4"
   >
-    Hello
+    <v-container>
+      <v-row class="pa-0">
+        <v-col>
+          <v-icon color="#00FF00">mdi-square-rounded</v-icon>
+          Easy
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-icon color="yellow-accent-2">mdi-square-rounded</v-icon>
+          Caution
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-icon color="red">mdi-square-rounded</v-icon>
+          Danger
+        </v-col>
+      </v-row>
+    </v-container>
   </v-sheet>
 </div>
   <!--<slot name="caption"></slot>-->
