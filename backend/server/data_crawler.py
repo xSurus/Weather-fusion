@@ -278,6 +278,11 @@ def crawl_rain_prediction(update_time: datetime.datetime):
     # check the next prediction
     new_version = get_next_prediction(old_prediction, RecordType.rain)
 
+    if old_prediction is not None:
+        print(f"Crawl rain prediction; new_version: {new_version.strftime('%Y%m%d_%H%M')}, old_version: {old_prediction.strftime('%Y%m%d_%H%M')}")
+    else:
+        print(f"Crawl rain prediction; new_version: {new_version.strftime('%Y%m%d_%H%M')}, old_version: None")
+
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
         update_rain_prediction(version=new_version, update_time=update_time)
