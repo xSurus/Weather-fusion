@@ -6,7 +6,7 @@ import DangerMap from "@/components/DangerMap.vue";
 
 const props = defineProps({
   map: {
-    type: string,
+    type: String,
     default: 'windy',
   },
 });
@@ -77,33 +77,18 @@ const fiveMinutesInADay = 288;
 </script>
 
 <template>
-<v-container>
-  <v-row>
-    <v-col cols="10">
-      <v-sheet
-        color="grey-darken-4"
-        rounded
-        :elevation="5"
-
-      >
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-              <v-window v-model="tab">
-                <v-window-item value="windy">
-                  <WindyMap ref="windy" :five_min="dateSlider" :initial_view="map_view"></WindyMap>
-                </v-window-item>
-                <v-window-item value="rain">
-                  <RainMap ref="rain" :five_min="dateSlider" :initial_view="map_view"></RainMap>
-                </v-window-item>
-                <v-window-item value="danger">
-                  <DangerMap ref="danger" :five_min="dateSlider" :initial_view="map_view"></DangerMap>
-                </v-window-item>
-              </v-window>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" class="pt-0 mt-0">
+<v-window v-model="tab" class="h-100">
+  <v-window-item value="windy" class="h-100">
+    <WindyMap ref="windy" :five_min="dateSlider" :initial_view="map_view"></WindyMap>
+  </v-window-item>
+  <v-window-item value="rain" class="h-100">
+    <RainMap ref="rain" :five_min="dateSlider" :initial_view="map_view"></RainMap>
+  </v-window-item>
+  <v-window-item value="danger" class="h-100">
+    <DangerMap ref="danger" :five_min="dateSlider" :initial_view="map_view"></DangerMap>
+  </v-window-item>
+</v-window>
+            <!--<v-col cols="12" class="pt-0 mt-0">
               <v-slider
                 color="primary"
                 thumb-color="white"
@@ -114,13 +99,8 @@ const fiveMinutesInADay = 288;
                 step="1"
               >
               </v-slider>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-sheet>
-    </v-col>
-    <v-col cols="2">
-      <v-sheet
+            </v-col>-->
+      <!--<v-sheet
         color="grey-darken-4"
         rounded
         class="pa-6"
@@ -129,7 +109,6 @@ const fiveMinutesInADay = 288;
         <v-tabs
           v-model="tab"
           direction="vertical"
-
         >
           <v-tab value="windy">
             Windy
@@ -141,10 +120,7 @@ const fiveMinutesInADay = 288;
             Danger
           </v-tab>
         </v-tabs>
-      </v-sheet>
-    </v-col>
-  </v-row>
-</v-container>
+      </v-sheet>-->
 </template>
 
 <style scoped>

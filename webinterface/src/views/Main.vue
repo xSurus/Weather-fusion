@@ -1,5 +1,26 @@
 <script setup>
 import WeatherMapUI from "@/components/WeatherMapUI.vue";
+import {ref} from "vue";
+
+const views = ref([
+  {
+    name: 'windy',
+    title: 'Wind',
+  },
+  {
+    name: 'rain',
+    title: 'Rain',
+  },
+  {
+    name: 'danger',
+    title: 'Danger',
+  },
+]);
+
+const selected_view = ref('wind');
+function select_map(name) {
+  selected_view.value = name;
+}
 
 </script>
 
@@ -10,15 +31,15 @@ import WeatherMapUI from "@/components/WeatherMapUI.vue";
     density="compact"
   >
     <v-app-bar-title>Weather Fusion</v-app-bar-title>
+    <v-spacer></v-spacer>
+    <v-toolbar-items>
+      <v-btn v-for="item in views" :key="item.name" text @click="select_map(item.name)">
+        {{ item.name }}
+      </v-btn>
+    </v-toolbar-items>
   </v-app-bar>
   <v-main class="bg-grey-darken-3">
-    <v-container>
-      <v-row>
-        <v-col cols="12">
-          <WeatherMapUI />
-        </v-col>
-      </v-row>
-    </v-container>
+    <WeatherMapUI :map="selected_view"/>
   </v-main>
 </template>
 

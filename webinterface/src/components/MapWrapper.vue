@@ -43,20 +43,17 @@ watch(five_minutes, (newValue) => {
 <div class="map_wrapper">
   <slot></slot>
 </div>
-<div class="text-caption mt-1">
-  <slot name="caption"></slot>
-</div>
-<div class="date_wrapper mt-1">
-  <div class="date bg-primary pa-2">
+  <!--<slot name="caption"></slot>-->
+  <!--<div class="date bg-primary pa-2">
     {{ date_string }}
-  </div>
-</div>
+  </div>-->
 </template>
 
 <style scoped>
 .map_wrapper {
   position: relative;
-  
+  width: 100%;
+  height: 100%;
 }
 
 .date_wrapper {
@@ -70,7 +67,7 @@ watch(five_minutes, (newValue) => {
 
 :deep(#windy), :deep(#rain), :deep(#danger){
   width: 100%;
-  height: 500px;
+  height: inherit;
   overflow: hidden;
 }
 
