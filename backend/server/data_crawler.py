@@ -277,7 +277,7 @@ def crawl_radar(update_time: datetime.datetime):
         if data is not None:
             transformed = decode_geojson(data)
 
-            store_path = os.path.join(server_config.data_home, "storage",  f"temp.json")
+            store_path = os.path.join(server_config.data_home, "storage", f"temp.json")
 
             with open(store_path, "w") as f:
                 json.dump(transformed, f)
