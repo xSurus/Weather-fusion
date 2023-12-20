@@ -237,7 +237,7 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
-        st, img_data = request_wind_prediction_strength(next_prediction, version, rt=RecordType.wind_10m)
+        st, img_data = request_wind_direction_direction(next_prediction, version, rt=RecordType.wind_10m)
 
         # Successful request
         if st == 200:
