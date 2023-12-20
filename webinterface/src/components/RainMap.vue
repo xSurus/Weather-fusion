@@ -57,6 +57,14 @@ defineExpose({
 
 let cloud_layer = null;
 
+function cloud_style(feature) {
+  return {
+    fillColor: feature.properties.color,
+    weight: 0,
+    fillOpacity: 1
+  };
+}
+
 function update_cloud_layer() {
   fetch('/api-v1/get-rain-data?' + new URLSearchParams({
     five_minutes: five_minutes.value,
@@ -74,7 +82,7 @@ function update_cloud_layer() {
     }
   }).then(data => {
     if (cloud_layer) {
-      leaflet_map.remove();
+      cloud_layer.remove();
     }
     let clouds = L.geoJSON(data, {style: cloud_style});
 
@@ -121,14 +129,6 @@ loadScript("https://unpkg.com/leaflet@1.4.0/dist/leaflet.js")
   });
 
   positionLabels.addTo(map);
-
-  function cloud_style(feature) {
-    return {
-      fillColor: feature.properties.color,
-      weight: 0,
-      fillOpacity: 1
-    };
-  }
 
   update_cloud_layer();
 
