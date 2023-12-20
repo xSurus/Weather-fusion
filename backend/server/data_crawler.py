@@ -279,6 +279,8 @@ def crawl_rain_prediction(update_time: datetime.datetime):
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
         update_rain_prediction(version=new_version, update_time=update_time)
+        return True
+    return False
 
 
 def crawl_wind_prediction(update_time: datetime.datetime):
@@ -293,6 +295,8 @@ def crawl_wind_prediction(update_time: datetime.datetime):
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
         update_wind_10_prediction(version=new_version, update_time=update_time)
+        return True
+    return False
 
 
 def crawl_radar(update_time: datetime.datetime):
