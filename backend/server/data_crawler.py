@@ -16,10 +16,8 @@ from server.mongodb_data_models import *
 # ----------------------------------------------------------------------------------------------------------------------
 config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
 
-
 if not os.path.exists(config_path):
     raise FileNotFoundError("Please create the server_config.json file in the data folder")
-
 
 with open(config_path, "r") as f:
     d = json.load(f)
@@ -27,6 +25,7 @@ with open(config_path, "r") as f:
     server_config = ServerConfig.model_validate(d)
     mongo = MongoAPI(db_address=server_config.mongo_db.address, db_name=server_config.mongo_db.database,
                      db_username=server_config.mongo_db.username, db_password=server_config.mongo_db.password)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Request Functions
