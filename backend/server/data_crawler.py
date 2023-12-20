@@ -260,11 +260,14 @@ def crawl_radar(update_time: datetime.datetime):
     """
     yesterday = update_time - datetime.timedelta(days=1)
     latest_record = mdbc.get_latest_radar_record(mongo)
-    latest_dt = latest_record.dt if latest_record is not None else datetime.datetime(yesterday.year,
-                                                                                     yesterday.month,
-                                                                                     yesterday.day,
-                                                                                     0, 0, 0,
-                                                                                     tzinfo=datetime.UTC)
+    if latest_record is None:
+        latest_dt = datetime.datetime(yesterday.year,
+                                      yesterday.month,
+                                      yesterday.day,
+                                      0, 0, 0,
+                                      tzinfo=datetime.UTC)
+    else:
+        latest_dt = pytz.utc.localize(latest_record.dt)
 
     assert type(latest_dt) is datetime.datetime, "type of last entry is not datetime"
 
