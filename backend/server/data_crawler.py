@@ -47,7 +47,7 @@ def request_radar_data(dt: datetime.datetime):
     return None
 
 
-def request_prediction_data(dt: datetime.datetime, version: datetime.datetime) -> Tuple[int, Union[dict, None]]:
+def request_rain_prediction_data(dt: datetime.datetime, version: datetime.datetime) -> Tuple[int, Union[dict, None]]:
     """
     Request the prediction data for a given datetime and provided a specific output version
     """
@@ -109,7 +109,7 @@ def update_prediction(version: datetime.datetime, update_time: datetime.datetime
     # Get the prediction for as long as they come and insert into the database
     while True:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
-        st, js = request_prediction_data(next_prediction, version)
+        st, js = request_rain_prediction_data(next_prediction, version)
 
         # Successful request
         if st == 200:
