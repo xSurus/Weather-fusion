@@ -108,14 +108,18 @@ def get_outdated_rain_prediction_entries(mongo: MongoAPI) -> List[RainRecord]:
     return res
 
 
-def get_outdated_wind_prediction_entries(mongo: MongoAPI) -> List[WindRecord]:
-    newest_prediction = mongo.find_one(collection="wind_data", filter_dict={}, sort=[{"version": -1}])
+def get_outdated_wind_prediction_entries(mongo: MongoAPI, now) -> List[WindRecord]:
+    """
+    Get the outdated wind records and return them (only based on the datetime of the record - not version)
+    """
+    records = mongo.find(collection="wind_data", filter_dict={"dt": {"$lt": now}})
 
-    if newest_prediction is None:
-        return []
+    res = []
+    for record in records:
+        record["_id"] = object_id_to_string(record["_id"])
+        res.append(WindRecord(**record))
 
-    current_version = newest_prediction["version"]
-    # records = mongo.find(collection="wind_data", filter)
+    return res
 
 
 def get_rain_record(mongo: MongoAPI, dt: datetime) -> Union[RainRecord, None]:
