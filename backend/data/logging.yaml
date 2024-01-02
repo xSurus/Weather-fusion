@@ -77,7 +77,7 @@ loggers:
         propagate: no
 
     data_crawler_worker:
-        level: INFO
+        level: DEBUG
         handlers:
             - cli_handler
             - data_crawler
