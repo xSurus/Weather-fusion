@@ -17,8 +17,8 @@ handlers:
         level: INFO
         backupCount: 52
         when: "W6"
-        # filename: /var/www/weather_fusion/logs/api_errors.log
-        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/api_errors.log
+        filename: /var/www/weather_fusion/logs/api_errors.log
+        # filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/api_errors.log
         formatter: error
 
     cli_handler:
@@ -31,8 +31,8 @@ handlers:
         level: INFO
         backupCount: 4
         when: "W6"
-        # filename: /var/www/weather_fusion/logs/api_access.log
-        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/api_access.log
+        filename: /var/www/weather_fusion/logs/api_access.log
+        # filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/api_access.log
         formatter: standard
 
     db_pruner:
@@ -40,8 +40,8 @@ handlers:
         level: INFO
         backupCount: 4
         when: "W6"
-        # filename: /var/www/weather_fusion/logs/db_pruner.log
-        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/db_pruner.log
+        filename: /var/www/weather_fusion/logs/db_pruner.log
+        # filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/db_pruner.log
         formatter: standard
 
     data_crawler:
@@ -49,8 +49,8 @@ handlers:
         level: INFO
         backupCount: 4
         when: "W6"
-        # filename: /var/www/weather_fusion/logs/data_crawler.log
-        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/data_crawler.log
+        filename: /var/www/weather_fusion/logs/data_crawler.log
+        # filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/data_crawler.log
         formatter: standard
 
 
