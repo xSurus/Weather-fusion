@@ -8,8 +8,11 @@ from server.mongo_db_api import *
 import server.mongo_db_common as mdbc
 from server.mongodb_data_models import *
 from server.config import ServerConfig
+from server.logs import setup_logging
+import logging
 
 
+# data_home = "/var/www/weather_fusion/data"
 data_home = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data"
 config_path = os.path.join(data_home, "server_config.json")
 
@@ -23,6 +26,11 @@ with open(config_path, "r") as f:
     mongo = MongoAPI(db_address=server_config.mongo_db.address, db_name=server_config.mongo_db.database,
                      db_username=server_config.mongo_db.username, db_password=server_config.mongo_db.password)
 
+# logging_cfg = "/var/www/weather_fusion/logs"
+logging_cfg = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/logging.yaml"
+setup_logging(logging_cfg)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -30,6 +38,8 @@ def remove_rain(records: List[RainRecord], rain_type: str):
     """
     Remove the predictions from the records
     """
+    fn_logger = logging.getLogger("db_prune_worker")
+
     db_count = 0
     file_count = 0
 
@@ -40,12 +50,14 @@ def remove_rain(records: List[RainRecord], rain_type: str):
             file_count += 1
 
         db_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
-    print(f"Deleted {db_count} {rain_type} entries from the database and {file_count} files from the storage")
+    fn_logger.info(f"Deleted {db_count} {rain_type} entries from the database and {file_count} files from the storage")
 
 
 def remove_wind(records: List[WindRecord]):
     db_count = 0
     file_count = 0
+
+    fn_logger = logging.getLogger("db_prune_worker")
 
     for entry in records:
         if entry.type == WindRecordType.strength:
@@ -60,12 +72,14 @@ def remove_wind(records: List[WindRecord]):
             file_count += 1
 
         db_count += mongo.delete_one(collection="wind_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
-    print(f"Deleted {db_count} wind entries from the database and {file_count} files from the storage")
+    fn_logger.info(f"Deleted {db_count} wind entries from the database and {file_count} files from the storage")
 
 
 def remove_danger(records: List[WindRecord]):
     db_count = 0
     file_count = 0
+
+    fn_logger = logging.getLogger("db_prune_worker")
 
     for entry in records:
         p = os.path.join(server_config.data_home, "storage", f"{entry.record_id}.json")
@@ -75,7 +89,7 @@ def remove_danger(records: List[WindRecord]):
             file_count += 1
 
         db_count += mongo.delete_one(collection="danger_data", filter_dict={"_id": string_to_object_id(entry.record_id)})
-    print(f"Deleted {db_count} danger entries from the database and {file_count} files from the storage")
+    fn_logger.info(f"Deleted {db_count} danger entries from the database and {file_count} files from the storage")
 
 
 def prune_rain_prediction():
@@ -115,9 +129,27 @@ def prune_wind():
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger("db_prune_worker")
+
     while True:
-        prune_radar()
-        prune_rain_prediction()
-        prune_wind()
-        prune_danger()
+        try:
+            prune_radar()
+        except Exception as e:
+            logger.exception(f"Exception while pruning radar", e)
+
+        try:
+            prune_rain_prediction()
+        except Exception as e:
+            logger.exception(f"Exception while pruning rain prediction", e)
+
+        try:
+            prune_wind()
+        except Exception as e:
+            logger.exception(f"Exception while pruning wind prediction", e)
+
+        try:
+            prune_danger()
+        except Exception as e:
+            logger.exception(f"Exception while prudning danger map", e)
         time.sleep(1800)
+
