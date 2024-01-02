@@ -1,0 +1,90 @@
+version: 1
+disable_existing_loggers: true
+
+
+
+formatters:
+    standard:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    error:
+        format: "%(asctime)s - %(levelname)s <PID %(process)d:%(processName)s> %(name)s.%(funcName)s(): %(message)s"
+    cli:
+        format: "%(name)s - %(levelname)s - %(message)s"
+
+handlers:
+    error_handler:
+        class: logging.handlers.TimedRotatingFileHandler
+        level: WARNING
+        backupCount: 52
+        when: "W6"
+        # filename: /var/www/logs/api_errors.log
+        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/api_errors.log
+        formatter: error
+
+    cli_handler:
+        class: logging.StreamHandler
+        level: INFO
+        stream: ext://sys.stdout
+
+    access_handler:
+        class: logging.handlers.TimedRotatingFileHandler
+        level: INFO
+        backupCount: 4
+        when: "W6"
+        # filename: /var/www/logs/api_access.log
+        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/api_access.log
+        formatter: standard
+
+    db_pruner:
+        class: logging.handlers.TimedRotatingFileHandler
+        level: INFO
+        backupCount: 4
+        when: "W6"
+        # filename: /var/www/logs/api_access.log
+        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/db_pruner.log
+        formatter: standard
+
+    data_crawler:
+        class: logging.handlers.TimedRotatingFileHandler
+        level: INFO
+        backupCount: 4
+        when: "W6"
+        # filename: /var/www/logs/api_access.log
+        filename: /home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/logs/data_crawler.log
+        formatter: standard
+
+
+loggers:
+    uvicorn.error:
+        level: DEBUG
+        handlers:
+            - cli_handler
+            - error_handler
+        propagate: no
+
+    uvicorn.access:
+        level: DEBUG
+        handlers:
+            - cli_handler
+            - access_handler
+        propagate: no
+
+    db_prune_worker:
+        level: INFO
+        handlers:
+            - cli_handler
+            - db_pruner
+        propagate: no
+
+    data_crawler_worker:
+        level: INFO
+        handlers:
+            - cli_handler
+            - data_crawler
+        propagate: no
+
+root:
+    level: DEBUG
+    handlers:
+        - cli_handler
+    propagate: no
