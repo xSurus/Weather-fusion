@@ -38,6 +38,9 @@ with open(config_path, "r") as f:
 logging_cfg = "/home/wf/weather_fusion/backend/data/logging.yaml"
 setup_logging(logging_cfg)
 
+print(f"Config Path: {config_path}")
+print(f"Logging Config Path: {logging_cfg}")
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Request Functions
 # ----------------------------------------------------------------------------------------------------------------------
