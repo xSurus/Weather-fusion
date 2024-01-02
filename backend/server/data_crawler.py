@@ -4,6 +4,7 @@ import os.path
 import time
 import warnings
 import copy
+import logging
 
 import pytz
 import requests as rq
@@ -14,11 +15,14 @@ from server.config import ServerConfig
 from server.mongo_db_api import MongoAPI, string_to_object_id, object_id_to_string
 import server.mongo_db_common as mdbc
 from server.mongodb_data_models import *
+from server.logs import setup_logging
 
 # ----------------------------------------------------------------------------------------------------------------------
 # GLOBALS
 # ----------------------------------------------------------------------------------------------------------------------
+
 config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
+# config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
 
 if not os.path.exists(config_path):
     raise FileNotFoundError("Please create the server_config.json file in the data folder")
@@ -30,6 +34,9 @@ with open(config_path, "r") as f:
     mongo = MongoAPI(db_address=server_config.mongo_db.address, db_name=server_config.mongo_db.database,
                      db_username=server_config.mongo_db.username, db_password=server_config.mongo_db.password)
 
+logging_cfg = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/logging.yaml"
+# logging_cfg = "/home/wf/weather_fusion/backend/data/logging.yaml"
+setup_logging(logging_cfg)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Request Functions
@@ -138,6 +145,8 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
     """
     Update the prediction data
     """
+    fn_logger = logging.getLogger("data_crawler_worker")
+
     next_prediction = (update_time - datetime.timedelta(minutes=update_time.minute % 5,
                                                         seconds=update_time.second,
                                                         microseconds=update_time.microsecond)
@@ -151,14 +160,18 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
-        st, js = request_rain_prediction_data(next_prediction, version)
+        try:
+            st, js = request_rain_prediction_data(next_prediction, version)
+        except Exception as e:
+            fn_logger.exception(f"Exception while requesting rain prediction", e)
+            st, js = 500, None
 
         # Successful request
         if st == 200:
             assert js is not None, "js is None from meteoswiss prediction response"
             store_path = os.path.join(server_config.data_home, "storage", "temp.json")
 
-            print(f"Got Prediction: {next_prediction.strftime('%Y%m%d_%H%M')}")
+            fn_logger.info(f"Got Prediction: {next_prediction.strftime('%Y%m%d_%H%M')}")
 
             # Transform the MeteoData to GeoJSON
             transformed = decode_geojson(js)
@@ -181,13 +194,15 @@ def update_rain_prediction(version: datetime.datetime, update_time: datetime.dat
 
         next_prediction += datetime.timedelta(minutes=5)
 
-    print("Done with prediction")
+    fn_logger.info("Done with prediction")
 
 
 def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.datetime):
     """
     Update the prediction data for the wind at 10m height
     """
+    fn_logger = logging.getLogger("data_crawler_worker")
+
     next_prediction = update_time - datetime.timedelta(minutes=update_time.minute,
                                                        seconds=update_time.second,
                                                        microseconds=update_time.microsecond)
@@ -200,14 +215,18 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
-        st, js = request_wind_prediction_strength(next_prediction, version, rt=RecordType.wind_10m)
+        try:
+            st, js = request_wind_prediction_strength(next_prediction, version, rt=RecordType.wind_10m)
+        except Exception as e:
+            fn_logger.exception(f"Exception while requesting wind prediction", e)
+            st, js = 500, None
 
         # Successful request
         if st == 200:
             assert js is not None, "js is None from meteoswiss prediction response"
             store_path = os.path.join(server_config.data_home, "storage", "temp.json")
 
-            print(f"Got Prediction Strength 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
+            fn_logger.info(f"Got Prediction Strength 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
 
             # Transform the MeteoData to GeoJSON
             transformed = decode_geojson(js)
@@ -239,14 +258,18 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
     # Get the prediction for as long as they come and insert into the database
     while next_prediction < end_prediction:
         assert next_prediction.minute % 5 == 0, "next_prediction is not a multiple of 5 minutes"
-        st, img_data = request_wind_direction_direction(next_prediction, version, rt=RecordType.wind_10m)
+        try:
+            st, img_data = request_wind_direction_direction(next_prediction, version, rt=RecordType.wind_10m)
+        except Exception as e:
+            fn_logger.exception(f"Exception while requesting wind prediction", e)
+            st, img_data = 500, None
 
         # Successful request
         if st == 200:
             assert img_data is not None, "js is None from meteoswiss prediction response"
             store_path = os.path.join(server_config.data_home, "storage", "temp.png")
 
-            print(f"Got Prediction Direction 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
+            fn_logger.info(f"Got Prediction Direction 10m: {next_prediction.strftime('%Y%m%d_%H%M')}")
 
             # Write to File
             with open(store_path, "wb") as f:
@@ -266,22 +289,28 @@ def update_wind_10_prediction(version: datetime.datetime, update_time: datetime.
 
         next_prediction += datetime.timedelta(hours=1)
 
-    print("Done with prediction")
+    fn_logger.info("Done with prediction")
 
 
 def crawl_rain_prediction(update_time: datetime.datetime):
     """
     Crawl Radar Prediction.
     """
+    fn_logger = logging.getLogger("data_crawler_worker")
+
     old_prediction = mdbc.get_rain_prediction_version(mongo)
 
     # check the next prediction
-    new_version = get_next_prediction(old_prediction, RecordType.rain)
+    try:
+        new_version = get_next_prediction(old_prediction, RecordType.rain)
+    except Exception as e:
+        fn_logger.exception(f"Exception while getting next prediction", e)
+        return False
 
     if old_prediction is not None:
-        print(f"Crawl rain prediction; new_version: {new_version.strftime('%Y%m%d_%H%M')}, old_version: {old_prediction.strftime('%Y%m%d_%H%M')}")
+        fn_logger.info(f"Crawl rain prediction; new_version: {new_version.strftime('%Y%m%d_%H%M')}, old_version: {old_prediction.strftime('%Y%m%d_%H%M')}")
     else:
-        print(f"Crawl rain prediction; new_version: {new_version.strftime('%Y%m%d_%H%M')}, old_version: None")
+        fn_logger.info(f"Crawl rain prediction; new_version: {new_version.strftime('%Y%m%d_%H%M')}, old_version: None")
 
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
@@ -290,14 +319,20 @@ def crawl_rain_prediction(update_time: datetime.datetime):
     return False
 
 
-def crawl_wind_prediction(update_time: datetime.datetime):
+def crawl_wind_prediction(update_time: datetime.datetime) -> bool:
     """
     Crawl Wind Prediction.
     """
+    fn_logger = logging.getLogger("data_crawler_worker")
+
     old_prediction = mdbc.get_wind_prediction_version(mongo)
 
     # check the next prediction
-    new_version = get_next_prediction(old_prediction, RecordType.wind_10m)
+    try:
+        new_version = get_next_prediction(old_prediction, RecordType.wind_10m)
+    except Exception as e:
+        fn_logger.exception(f"Exception while getting next prediction", e)
+        return False
 
     # Update config if it has changed
     if old_prediction is None or new_version != old_prediction:
@@ -310,6 +345,8 @@ def crawl_radar(update_time: datetime.datetime):
     """
     Crawl the radar data.
     """
+    fn_logger = logging.getLogger("data_crawler_worker")
+
     yesterday = update_time - datetime.timedelta(days=1)
     latest_record = mdbc.get_latest_radar_record(mongo)
     if latest_record is None:
@@ -326,7 +363,11 @@ def crawl_radar(update_time: datetime.datetime):
     while latest_dt < update_time:
         assert latest_dt.minute % 5 == 0, "latest_dt is not a multiple of 5 minutes"
 
-        data = request_radar_data(latest_dt)
+        try:
+            data = request_radar_data(latest_dt)
+        except Exception as e:
+            fn_logger.exception(f"Error while requesting radar data", e)
+            data = None
 
         # only write if we have data
         if data is not None:
@@ -365,6 +406,8 @@ def regenerate_danger():
     """
     Regenerate the danger data.
     """
+    fn_logger = logging.getLogger("data_crawler_worker")
+
     latest_rain = mdbc.get_rain_prediction_version(mongo)
     latest_wind = mdbc.get_wind_prediction_version(mongo)
 
@@ -401,7 +444,7 @@ def regenerate_danger():
 
             # this shouldn't happen
             if rain_record is None:
-                warnings.warn("Rain record is None")
+                fn_logger.warning("Rain record is None")
                 cur_time += datetime.timedelta(minutes=5)
                 continue
 
@@ -412,7 +455,7 @@ def regenerate_danger():
             # make sure the wind data exists
             rain_path = os.path.join(server_config.data_home, "storage", f"{rain_record.record_id}.json")
             if not os.path.exists(rain_path):
-                warnings.warn("Rain record does not exist")
+                fn_logger.warning("Rain record does not exist")
                 cur_time += datetime.timedelta(minutes=5)
                 continue
 
@@ -450,7 +493,7 @@ def regenerate_danger():
                 rain_version=rain_record.version
             )
 
-            print("Added Danger Record for ", cur_time)
+            fn_logger.info("Added Danger Record for ", cur_time)
             dr.record_id = object_id_to_string(mdbc.insert_danger_record(mongo, dr))
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
                                                f"{dr.record_id}.json"))
@@ -459,13 +502,31 @@ def regenerate_danger():
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger("data_crawler_worker")
     while True:
         update_dt = datetime.datetime.now(datetime.UTC)
-        crawl_radar(update_time=update_dt)
-        data_changed = crawl_wind_prediction(update_time=update_dt)
-        data_changed = data_changed or crawl_rain_prediction(update_time=update_dt)
+        try:
+            crawl_radar(update_time=update_dt)
+        except Exception as e:
+            logger.exception(f"Exception while crawling radar", e)
 
-        if data_changed:
-            regenerate_danger()
-        print("Sleeping for 5 minutes")
+        try:
+            data_changed = crawl_wind_prediction(update_time=update_dt)
+        except Exception as e:
+            logger.exception(f"Exception while crawling wind prediction", e)
+            data_changed = False
+
+        try:
+            data_changed = data_changed or crawl_rain_prediction(update_time=update_dt)
+        except Exception as e:
+            logger.exception(f"Exception while crawling rain prediction", e)
+            data_changed = False
+
+        try:
+            if data_changed:
+                regenerate_danger()
+        except Exception as e:
+            logger.exception(f"Exception while regenerating danger", e)
+
+        logger.debug("Sleeping for 5 minutes")
         time.sleep(300)
