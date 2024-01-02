@@ -493,7 +493,7 @@ def regenerate_danger():
                 rain_version=rain_record.version
             )
 
-            fn_logger.info("Added Danger Record for ", cur_time)
+            fn_logger.info(f"Added Danger Record for {cur_time}")
             dr.record_id = object_id_to_string(mdbc.insert_danger_record(mongo, dr))
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
                                                f"{dr.record_id}.json"))
