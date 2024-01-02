@@ -13,8 +13,8 @@ import server.mongo_db_common as mdbc
 from server.mongo_db_api import MongoAPI, string_to_object_id, object_id_to_string
 
 
-storage_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-config_path = os.path.join(storage_path, "server_config.json")
+# config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
+config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
 
 
 app = FastAPI(title="Weather Fusion", version="0.1.0")
@@ -57,7 +57,7 @@ def get_rain(five_minutes: int):
     record = mdbc.get_rain_record(mongo, dt)
     if record is None:
         raise HTTPException(404, "Record not found")
-    path = os.path.join(storage_path, "storage", f"{record.record_id}.json")
+    path = os.path.join(server_config.data_home, "storage", f"{record.record_id}.json")
 
     if os.path.exists(path):
         return FileResponse(path)
@@ -79,7 +79,7 @@ def get_wind_speed(five_minutes: int):
     if record is None:
         raise HTTPException(404, "Record not found")
 
-    path = os.path.join(storage_path, "storage", f"{record.record_id}.json")
+    path = os.path.join(server_config.data_home, "storage", f"{record.record_id}.json")
 
     if os.path.exists(path):
         return FileResponse(path)
@@ -101,7 +101,7 @@ def get_wind_direction(five_minutes: int):
     if record is None:
         raise HTTPException(404, "Record not found")
 
-    path = os.path.join(storage_path, "storage", f"{record.record_id}.png")
+    path = os.path.join(server_config.data_home, "storage", f"{record.record_id}.png")
 
     if os.path.exists(path):
         warnings.warn("Sending png file - will switch to geojson soon")
@@ -124,7 +124,7 @@ def get_danger_noodle(five_minutes: int):
     if record is None:
         raise HTTPException(404, "Record not found")
 
-    path = os.path.join(storage_path, "storage", f"{record.record_id}.json")
+    path = os.path.join(server_config.data_home, "storage", f"{record.record_id}.json")
 
     if os.path.exists(path):
         return FileResponse(path)
