@@ -12,8 +12,8 @@ from server.logs import setup_logging
 import logging
 
 
-# config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
-config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
+config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
+# config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
 
 if not os.path.exists(config_path):
     raise FileNotFoundError("Please create the server_config.json file in the data folder")
@@ -25,8 +25,8 @@ with open(config_path, "r") as f:
     mongo = MongoAPI(db_address=server_config.mongo_db.address, db_name=server_config.mongo_db.database,
                      db_username=server_config.mongo_db.username, db_password=server_config.mongo_db.password)
 
-# logging_cfg = "/home/wf/weather_fusion/backend/data/logging.yaml"
-logging_cfg = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/logging.yaml"
+logging_cfg = "/home/wf/weather_fusion/backend/data/logging.yaml"
+# logging_cfg = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/logging.yaml"
 setup_logging(logging_cfg)
 
 
