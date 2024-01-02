@@ -13,8 +13,8 @@ import server.mongo_db_common as mdbc
 from server.mongo_db_api import MongoAPI, string_to_object_id, object_id_to_string
 
 
-# config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
-config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
+config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data/server_config.json"
+# config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
 
 
 app = FastAPI(title="Weather Fusion", version="0.1.0", docs_url=None, redoc_url=None)
