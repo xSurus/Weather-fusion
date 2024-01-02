@@ -17,8 +17,8 @@ config_path = "/home/alisot2000/Documents/02_ETH/FWE/Weather-fusion/backend/data
 # config_path = "/home/wf/weather_fusion/backend/data/server_config.json"
 
 
-app = FastAPI(title="Weather Fusion", version="0.1.0")
-api_app = FastAPI(title="Weather Fusion API", version="0.1.0")
+app = FastAPI(title="Weather Fusion", version="0.1.0", docs_url=None, redoc_url=None)
+api_app = FastAPI(title="Weather Fusion API", version="0.1.0", docs_url=None, redoc_url=None)
 
 
 if not os.path.exists(config_path):
