@@ -210,4 +210,5 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 # .idea
-backend/data
+backend/data/storage
+backend/data/server_config.json
