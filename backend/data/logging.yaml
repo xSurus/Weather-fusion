@@ -14,7 +14,7 @@ formatters:
 handlers:
     error_handler:
         class: logging.handlers.TimedRotatingFileHandler
-        level: WARNING
+        level: INFO
         backupCount: 52
         when: "W6"
         # filename: /var/www/weather_fusion/logs/api_errors.log
