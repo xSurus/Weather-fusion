@@ -150,5 +150,5 @@ if __name__ == "__main__":
             prune_danger()
         except Exception as e:
             logger.exception(f"Exception while prudning danger map", e)
-        time.sleep(1800)
+        time.sleep(300)
 
