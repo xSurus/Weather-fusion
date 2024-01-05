@@ -50,18 +50,7 @@ for d in all_data:
 
     del_count += mongo.delete_one(collection="wind_data", filter_dict={"_id": d['_id']})
 
-print(f"Removed {rm_count} files and {del_count} database entries for wind_data")
-
-all_data = mongo.find(collection="rain_data", filter_dict={})
-print(len(all_data))
-rm_count = 0
-del_count = 0
-for d in all_data:
-    path = os.path.join(data_home, "storage", object_id_to_string(d['_id']) + ".json")
-    if os.path.exists(path):
-        os.remove(path)
-        rm_count += 1
-
-    del_count += mongo.delete_one(collection="rain_data", filter_dict={"_id": d['_id']})
-
-print(f"Removed {rm_count} files and {del_count} database entries for rain_data")
+# Empty all generated data
+# mongo.delete(collection="danger_data", filter_dict={})
+# mongo.delete(collection="wind_data", filter_dict={})
+# mongo.delete(collection="rain_data", filter_dict={})
