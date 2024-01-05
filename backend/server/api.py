@@ -136,6 +136,13 @@ main = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.absp
                     "dist")
 assets = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "webinterface",
                       "dist", "assets")
+
+
+@api_app.get("/test-error")
+def test_error():
+    raise ValueError("Some Value Error for testing")
+
+
 app.mount("/assets", StaticFiles(directory=assets), name="assets")
 app.mount("/api-v1", api_app, name="api-v1")
 
