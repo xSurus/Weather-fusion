@@ -212,3 +212,4 @@ fabric.properties
 # .idea
 backend/data/storage
 backend/data/server_config.json
+/backend/data/server_config_backup.json
