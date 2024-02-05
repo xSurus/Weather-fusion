@@ -385,7 +385,7 @@ def crawl_radar(update_time: datetime.datetime):
             )
 
             record_id = mdbc.insert_radar_record(mongo, new_element)
-            print("Got Radar for ", latest_dt)
+            fn_logger.info(f"Got Radar for {latest_dt}")
             os.rename(store_path, os.path.join(server_config.data_home, "storage",
                                                f"{object_id_to_string(record_id)}.json"))
 
